@@ -1,0 +1,10 @@
+node_modules/
+build/
+*.o
+*.elf
+*.hex
+.firebase/
+firebase-debug.log
+kiem_thu/gia_lap_uno
+kiem_thu/simavr/dau_cuoi
+kiem_thu/simavr/do_ws2812

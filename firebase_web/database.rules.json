@@ -1,0 +1,33 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "may": {
+      ".read": true,
+      "$may": {
+        ".write": "auth != null && $may.matches(/^[a-z0-9_-]{1,20}$/)",
+        "hien_tai": {
+          ".validate": "newData.child('loai').isString() && newData.child('loai').val().matches(/^(ket_qua|lap_ghep|loi|cho)$/)"
+        },
+        "trang_thai": {
+          ".validate": "newData.hasChildren(['online', 'luc'])"
+        },
+        "$khac": {
+          ".validate": false
+        }
+      }
+    },
+    "nhat_ky": {
+      ".read": true,
+      "$may": {
+        ".write": "auth != null && $may.matches(/^[a-z0-9_-]{1,20}$/)",
+        ".indexOn": [
+          "luc"
+        ],
+        "$id": {
+          ".validate": "newData.child('loai').val() === 'ket_qua' && newData.child('cong_thuc').isString() && newData.child('cong_thuc').val().length <= 40"
+        }
+      }
+    }
+  }
+}

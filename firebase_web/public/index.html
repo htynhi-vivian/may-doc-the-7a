@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Máy đọc thẻ trực tuyến</title>
+<style>
+:root{
+  --ink:#2b2d42; --muted:#6b6f85; --line:#d6dcf5; --bg:#f4f7ff; --card:#ffffff;
+  --pink:#e84a6f; --pinkSoft:#ffe3ec; --blue:#1e88e5; --blueSoft:#e3f2fd;
+  --green:#0fa37f; --greenSoft:#d8f7ec; --amber:#c77700; --amberSoft:#fff3c4;
+  --purple:#7c3aed; --purpleSoft:#ede4ff; --red:#e03131; --redSoft:#ffe1e1;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
+.wrap{max-width:1400px;margin:0 auto;padding:16px 18px 40px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;margin-bottom:14px}
+h1{margin:0;font-size:1.7rem;line-height:1.15}
+h1 .a{color:var(--blue)}h1 .b{color:var(--pink)}h1 .c{color:var(--purple)}
+.sub{margin:3px 0 0;color:var(--muted);font-size:.95rem}
+.tools{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.grid{display:grid;grid-template-columns:minmax(0,0.95fr) minmax(0,1.3fr);gap:16px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+button,select{font:inherit;border-radius:12px;border:0;padding:9px 14px;cursor:pointer}
+button{background:var(--blue);color:#fff;font-weight:700}
+button.pink{background:var(--pink)}button.green{background:var(--green)}button.ghost{background:var(--blueSoft);color:var(--blue)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+select{background:var(--bg);color:var(--ink);border:1px solid var(--line);max-width:100%}
+label.chk{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.9rem}
+.status{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pill{border-radius:12px;padding:8px 10px;font-size:.88rem}
+.pill b{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.pill.idle{background:var(--bg);color:var(--muted)}
+.pill.ok{background:var(--greenSoft);color:#08604b}
+.pill.wait{background:var(--amberSoft);color:#7a4a00}
+.pill.err{background:var(--redSoft);color:#9b1c1c}
+.assembly{margin-top:10px;border-radius:12px;background:var(--amberSoft);padding:8px 12px;font-size:.95rem}
+.assembly b{font-size:1.25rem}
+h2{font-size:.95rem;margin:14px 0 6px}
+.log{list-style:none;margin:0;padding:0;max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-family:Consolas,"Courier New",monospace;font-size:.82rem}
+.log li{padding:4px 10px;border-bottom:1px solid var(--line)}
+.log li:last-child{border-bottom:0}
+.log .out{color:var(--blue)}.log .in{color:var(--green)}.log .warn{color:var(--red)}
+/* ---- Bảng lý thuyết ---- */
+.theory{min-height:520px}
+.th-empty{display:grid;place-items:center;min-height:480px;text-align:center;color:var(--muted)}
+.th-empty .big{font-size:3.4rem;font-weight:800;color:#c9d0ea;line-height:1}
+.th-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+.th-f{font-size:3rem;font-weight:800;line-height:1.05}
+.th-f sub{font-size:.55em}
+.th-name{font-size:1.35rem;font-weight:700;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{border-radius:99px;padding:4px 12px;font-size:.85rem;font-weight:700}
+.chip.dc{background:var(--blueSoft);color:#0d5ea8}.chip.hc{background:var(--pinkSoft);color:#b3264a}
+.chip.ion{background:var(--purpleSoft);color:#5b21b6}.chip.cht{background:var(--greenSoft);color:#08604b}
+.chip.kl{background:#ffe8d9;color:#9a3412}.chip.kh{background:#d9f4fa;color:#0e6f82}.chip.pk{background:#eef0f6;color:#475069}
+.chip.tt{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--bg);border-radius:12px;padding:8px 12px}
+.stat .n{font-size:1.7rem;font-weight:800;line-height:1.1}
+.stat .l{font-size:.78rem;color:var(--muted);font-weight:600}
+.th-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:12px}
+@media (max-width:1180px){.th-body{grid-template-columns:1fr}}
+.figbox{background:#fbfcff;border:1px solid var(--line);border-radius:14px;padding:10px}
+.figbox svg{width:100%;height:auto;max-height:300px;display:block}
+.figbox .cap{font-size:.82rem;color:var(--muted);margin-top:6px}
+.v3d-stage{cursor:grab;touch-action:none;border-radius:10px;outline:none}
+.v3d-stage.drag{cursor:grabbing}
+.v3d-stage:focus-visible{box-shadow:0 0 0 3px #1e88e5}
+.v3d-stage svg{user-select:none;-webkit-user-select:none}
+.v3d-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.v3d-hint{font-size:.8rem;font-weight:700;color:#1e88e5;margin-right:auto}
+.v3d-bar button{min-height:0;padding:4px 12px;font-size:.8rem;border-radius:99px;background:#e3f2fd;color:#1565c0;border:0;box-shadow:none;font-weight:700;cursor:pointer}
+.v3d-bar button:focus-visible{outline:3px solid #1e88e5;outline-offset:1px}
+.figbox .extra{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.figbox .extra svg{max-height:260px}
+.mass{margin-top:8px;font-size:.9rem;background:var(--bg);border-radius:10px;padding:6px 10px}
+.sec{margin:0 0 10px}
+.sec h3{margin:0 0 2px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.sec p{margin:0}
+.box{border-radius:12px;padding:8px 12px;margin:0 0 10px;font-size:.95rem}
+.box.at{background:var(--redSoft);color:#8f1d1d}.box.biet{background:var(--amberSoft);color:#6b4100}
+.box.may{background:var(--blueSoft);color:#0d4f8b}.box.may.sai{background:var(--pinkSoft);color:#9d1f43}
+.box b.t{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.warnbox{background:var(--redSoft);color:#9b1c1c;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:.92rem}
+.help{margin-top:16px}
+.help ol{margin:6px 0 0;padding-left:1.3em}.help li{margin:4px 0}
+.note{margin-top:10px;background:var(--blueSoft);border-radius:12px;padding:10px 14px;font-size:.92rem}
+
+/* ---- Bổ sung cho trang trực tuyến ---- */
+.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.tabs button{background:transparent;color:var(--muted);padding:7px 14px}
+.tabs button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.lcd{background:#2f6b2f;border:6px solid #1b1d2b;border-radius:12px;padding:10px 12px;font:600 1.35rem/1.35 Consolas,"Courier New",monospace;color:#d9ffd0;letter-spacing:.06em;box-shadow:inset 0 0 0 2px #3d8a3d}
+.lcd div{white-space:pre;overflow:hidden;min-height:1.35em}
+.lcd sub{font-size:.62em}
+.lcd.off{background:#3a3d4f;color:#8b90a8;box-shadow:none}
+.lcdcap{display:flex;justify-content:space-between;gap:8px;font-size:.8rem;color:var(--muted);margin-top:4px}
+.dots{display:flex;gap:4px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block}.dots i.on{background:var(--green)}
+.evt{margin-top:10px;border-radius:12px;padding:8px 12px;font-size:.92rem}
+.evt.loi{background:var(--redSoft);color:#9b1c1c}
+.log li{display:flex;gap:10px;align-items:baseline}
+.log li time{color:var(--muted);flex:none}
+.log li .f{font-weight:700;color:var(--ink)}
+.log li .k{margin-left:auto;color:var(--muted);flex:none}
+.log li.empty{color:var(--muted);display:block}
+details.sim{margin-top:14px;border:1px dashed var(--line);border-radius:14px;padding:8px 12px;background:#fbfcff}
+details.sim summary{cursor:pointer;font-weight:700;color:var(--purple)}
+.sim .row input,.sim .row select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);color:var(--ink);min-width:0}
+.sim .row input{flex:1}
+.sim small{display:block;color:var(--muted);margin-top:6px;font-size:.82rem}
+.class{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;color:var(--ink);font-weight:400;cursor:pointer;display:block;width:100%}
+.mcard:hover{border-color:var(--blue)}
+.mcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mcard .id{font-weight:800;font-size:1.05rem}
+.mcard .on{font-size:.75rem;font-weight:700;border-radius:99px;padding:2px 9px}
+.mcard .on.y{background:var(--greenSoft);color:#08604b}.mcard .on.n{background:var(--bg);color:var(--muted)}
+.mcard .f{font-size:2rem;font-weight:800;line-height:1.15;margin-top:6px}
+.mcard .f sub{font-size:.55em}
+.mcard .k{font-size:.85rem;color:var(--muted)}
+.mcard.moi{animation:moi 1.6s ease-out}
+@keyframes moi{0%{box-shadow:0 0 0 4px var(--amber)}100%{box-shadow:0 0 0 0 transparent}}
+.emptyclass{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 10px}
+.banner{border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:.92rem}
+.banner.demo{background:var(--purpleSoft);color:#4c1d95}
+.banner.err{background:var(--redSoft);color:#9b1c1c}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1><span class="a">Máy đọc thẻ</span> <span class="b">phân tử</span> <span class="c">trực tuyến</span></h1>
+    <p class="sub">KHTN 7 · Bài 5, 6 · Máy đọc thẻ QR tự gửi kết quả qua Internet; trang này nhận ngay và hiện bài lý thuyết</p>
+  </div>
+  <div class="tools">
+    <div class="tabs" role="group" aria-label="Chế độ xem">
+      <button id="tabMot" aria-pressed="true">Một máy</button>
+      <button id="tabLop" aria-pressed="false">Cả lớp</button>
+    </div>
+    <label class="chk" for="may">Máy:</label>
+    <select id="may" aria-label="Chọn máy đọc thẻ"><option value="">(chưa có máy nào)</option></select>
+    <label class="chk" for="pick">Xem nhanh:</label>
+    <select id="pick" aria-label="Chọn một chất để xem lý thuyết"></select>
+    <label class="chk"><input type="checkbox" id="beep" checked> Kêu “bíp”</label>
+  </div>
+</header>
+
+<div id="banner"></div>
+
+<section id="viewLop" hidden>
+  <div class="class" id="class"></div>
+</section>
+
+<div class="grid" id="viewMot">
+  <section class="panel">
+    <div class="lcd off" id="lcd" aria-live="polite"><div id="lcd0">  CHUA CO MAY</div><div id="lcd1"></div></div>
+    <div class="lcdcap"><span id="lcdNote">Màn hình LCD của máy (hiện lại trên web)</span><span class="dots" id="dots"></span></div>
+    <div class="status">
+      <div class="pill idle" id="stMay"><b>Máy</b>Chưa chọn máy</div>
+      <div class="pill idle" id="stNet"><b>Firebase</b>Đang kết nối…</div>
+    </div>
+    <div class="assembly" id="assembly" hidden></div>
+    <div class="evt" id="evt" hidden></div>
+    <h2>Các lần quét gần đây của máy này</h2>
+    <ul class="log" id="log"><li class="empty">Chưa có lần quét nào.</li></ul>
+
+    <details class="sim" id="sim">
+      <summary>Máy giả lập (dùng khi chưa có máy thật, hoặc để thử trang)</summary>
+      <div class="row">
+        <label class="chk" for="simId">Tên máy</label>
+        <input id="simId" value="giaolap" maxlength="20" aria-label="Tên máy giả lập" style="max-width:140px">
+      </div>
+      <div class="row">
+        <select id="simCard" aria-label="Chọn thẻ để quét"></select>
+        <button id="simScan">Quét thẻ</button>
+      </div>
+      <div class="row">
+        <input id="simCode" placeholder="Hoặc gõ mã: CT:CO2|Carbon dioxide · NT:H · H,H,O" aria-label="Gõ mã thẻ">
+        <button class="green" id="simSend">Gửi</button>
+      </div>
+      <div class="row">
+        <button class="ghost" id="simDone">Thẻ XONG</button>
+        <button class="ghost" id="simClear">Thẻ XÓA</button>
+        <button class="ghost" id="simWipe" title="Xóa nhật ký của máy đang xem">Xóa nhật ký máy đang xem</button>
+      </div>
+      <small>Máy giả lập suy luận theo đúng quy tắc của chương trình trên ESP32-CAM và ghi lên Firebase giống hệt máy thật, nên mọi trang đang mở đều thấy.</small>
+    </details>
+  </section>
+
+  <section class="panel theory" id="theory" aria-live="polite">
+    <div class="th-empty"><div><div class="big">H<sub>2</sub>O ?</div><p>Khi máy quét một thẻ, bài lý thuyết của chất sẽ hiện ở đây.<br>Hoặc chọn một chất ở ô <b>Xem nhanh</b> phía trên.</p></div></div>
+  </section>
+</div>
+
+<section class="panel help">
+  <b>Cách dùng</b>
+  <ol>
+    <li>Bật máy (bản ESP32-CAM, hoặc bản Arduino Uno + GM65 + ESP32 cầu nối). Màn LCD hiện <b>Da noi Internet</b> là máy đã lên mạng.</li>
+    <li>Mở trang này trên máy chiếu, máy tính hay điện thoại (cần Internet). Chọn tên máy của nhóm ở ô <b>Máy</b>.</li>
+    <li>Đưa thẻ QR trước đầu đọc, giữ yên khoảng 1 giây. Máy tự đọc, tự kết luận và tự gửi lên trang; trang cập nhật trong khoảng 1–2 giây. Đèn trên máy: xanh dương = chưa quét, vàng = đã quét, xanh lá = quét xong.</li>
+    <li>Thẻ nguyên tử: quét lần lượt (đưa thẻ ra khỏi khung giữa hai thẻ giống nhau), rồi quét thẻ <b>XONG</b>.</li>
+    <li>Giáo viên bấm <b>Cả lớp</b> để xem kết quả mới nhất của mọi nhóm; bấm vào một ô để xem chi tiết nhóm đó.</li>
+  </ol>
+  <div class="note">Máy giải mã QR và kết luận theo quy tắc cố định, <b>không phải AI</b>. Máy chỉ gửi nội dung thẻ và kết quả lên Firebase, <b>không gửi hình ảnh camera</b>.</div>
+</section>
+</div>
+
+<script src="cau_hinh_firebase.js"></script>
+<script src="firebase_sdk.js"></script>
+<script src="theory.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

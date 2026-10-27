@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<style>
+  body { margin: 0; background: #f4f1ea; font-family: "Segoe UI", Arial, sans-serif; }
+  #canvas { position: relative; width: 2400px; height: 1720px; background:
+    radial-gradient(circle at 20% 10%, #fbf9f4, #efe9dc 70%); overflow: hidden; }
+  .part { position: absolute; transform-origin: 0 0; }
+  .tag { position: absolute; font-weight: 800; color: #2b2d42; font-size: 26px; background: rgba(255,255,255,.9);
+         padding: 4px 12px; border-radius: 10px; border: 2px solid #2b2d42; white-space: nowrap; }
+  .tag small { display: block; font-size: 16px; font-weight: 600; color: #495057; }
+  h1 { position: absolute; left: 40px; top: 18px; margin: 0; font-size: 38px; color: #2b2d42; }
+  .sub { position: absolute; left: 42px; top: 70px; font-size: 20px; color: #495057; }
+  #wires { position: absolute; left: 0; top: 0; pointer-events: none; }
+  .note { position: absolute; font-size: 19px; color: #c92a2a; background: #fff5f5; border: 2px solid #e03131; border-radius: 12px; padding: 12px 18px; line-height: 1.5; }
+</style></head>
+<body>
+<div id="canvas">
+  <h1>HÌNH 3 · LẮP MẠCH BẰNG LINH KIỆN THẬT — BẢN TỰ ĐỘNG</h1>
+  <div class="sub">Arduino Uno + GM65 (tự quét) + đèn LED RGB + LCD 1602 I2C + ESP32 (cầu nối Internet) + pin 18650 qua LM2596 · dây đỏ = 5 V, đen = GND, cam = 3,3 V</div>
+
+  <!-- ESP32 -->
+  <div id="esp" class="part" style="left:70px; top:200px" data-pins='{"3V3": [13, 95], "GND_L": [13, 426.5], "5V": [13, 554.0], "GND_R": [237, 95], "P16": [237, 375.5], "P4": [237, 401.0]}'>
+    <svg width="250" height="650" viewBox="0 0 250 650"><rect x="2" y="2" width="246" height="646" rx="10" fill="#1c1c1e" stroke="#000" stroke-width="2"/><rect x="55" y="8" width="140" height="58" rx="3" fill="#0f172a" stroke="#555"/><path d="M68 54 h14 v-34 h14 v34 h14 v-34 h14 v34 h14 v-34 h14 v34 h14 v-34" stroke="#d4a017" stroke-width="3" fill="none"/><rect x="60" y="72" width="130" height="150" rx="3" fill="#b8bcc4" stroke="#7a7f88"/><text x="125" y="140" text-anchor="middle" font-family="Arial" font-size="17" font-weight="bold" fill="#222">ESP-32S</text><text x="125" y="160" text-anchor="middle" font-family="Arial" font-size="11" fill="#333">Ai-Thinker</text><rect x="95" y="300" width="60" height="60" fill="#111" /><text x="125" y="335" text-anchor="middle" font-family="Arial" font-size="11" fill="#aaa">CH340</text><text x="125" y="250" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#e5e7eb">NodeMCU-32S</text><circle cx="170" cy="400" r="5" fill="#3b82f6"/><rect x="40" y="590" width="34" height="22" rx="3" fill="#ddd"/><rect x="176" y="590" width="34" height="22" rx="3" fill="#ddd"/><text x="57" y="625" text-anchor="middle" font-family="Arial" font-size="10" fill="#ccc">EN</text><text x="193" y="625" text-anchor="middle" font-family="Arial" font-size="10" fill="#ccc">BOOT</text><rect x="100" y="606" width="50" height="40" rx="3" fill="#c0c4cc"/><circle cx="13" cy="95.0" r="7" fill="#e0b437" stroke="#555"/><text x="27" y="99.0" text-anchor="start" font-family="Arial" font-size="12" font-weight="bold" fill="#fde68a">3V3</text><circle cx="13" cy="120.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="124.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">EN</text><circle cx="13" cy="146.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="150.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">SVP</text><circle cx="13" cy="171.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="175.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">SVN</text><circle cx="13" cy="197.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="201.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P34</text><circle cx="13" cy="222.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="226.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P35</text><circle cx="13" cy="248.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="252.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P32</text><circle cx="13" cy="273.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="277.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P33</text><circle cx="13" cy="299.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="303.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P25</text><circle cx="13" cy="324.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="328.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P26</text><circle cx="13" cy="350.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="354.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P27</text><circle cx="13" cy="375.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="379.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P14</text><circle cx="13" cy="401.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="405.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P12</text><circle cx="13" cy="426.5" r="7" fill="#e0b437" stroke="#555"/><text x="27" y="430.5" text-anchor="start" font-family="Arial" font-size="12" font-weight="bold" fill="#fde68a">GND</text><circle cx="13" cy="452.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="456.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P13</text><circle cx="13" cy="477.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="481.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">SD2</text><circle cx="13" cy="503.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="507.0" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">SD3</text><circle cx="13" cy="528.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="27" y="532.5" text-anchor="start" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">CMD</text><circle cx="13" cy="554.0" r="7" fill="#e0b437" stroke="#555"/><text x="27" y="558.0" text-anchor="start" font-family="Arial" font-size="12" font-weight="bold" fill="#fde68a">5V</text><circle cx="237" cy="95.0" r="7" fill="#e0b437" stroke="#555"/><text x="223" y="99.0" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="#fde68a">GND</text><circle cx="237" cy="120.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="124.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P23</text><circle cx="237" cy="146.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="150.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P22</text><circle cx="237" cy="171.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="175.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">TX</text><circle cx="237" cy="197.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="201.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">RX</text><circle cx="237" cy="222.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="226.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P21</text><circle cx="237" cy="248.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="252.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">GND</text><circle cx="237" cy="273.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="277.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P19</text><circle cx="237" cy="299.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="303.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P18</text><circle cx="237" cy="324.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="328.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P5</text><circle cx="237" cy="350.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="354.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P17</text><circle cx="237" cy="375.5" r="7" fill="#e0b437" stroke="#555"/><text x="223" y="379.5" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="#fde68a">P16</text><circle cx="237" cy="401.0" r="7" fill="#e0b437" stroke="#555"/><text x="223" y="405.0" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="#fde68a">P4</text><circle cx="237" cy="426.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="430.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P0</text><circle cx="237" cy="452.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="456.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P2</text><circle cx="237" cy="477.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="481.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">P15</text><circle cx="237" cy="503.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="507.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">SD1</text><circle cx="237" cy="528.5" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="532.5" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">SD0</text><circle cx="237" cy="554.0" r="7" fill="#9aa0a6" stroke="#555"/><text x="223" y="558.0" text-anchor="end" font-family="Arial" font-size="10" font-weight="normal" fill="#d1d5db">CLK</text></svg>
+  </div>
+  <!-- Arduino Uno -->
+  <wokwi-arduino-uno id="uno" class="part" style="left:820px; top:560px; transform:scale(2.2)"></wokwi-arduino-uno>
+  <!-- LCD -->
+  <wokwi-lcd1602 id="lcd" class="part" pins="i2c" style="left:1770px; top:720px; transform:scale(2.0)"></wokwi-lcd1602>
+  <!-- Đèn LED RGB WS2812B (mạch MKE-M22, tự vẽ) -->
+  <div id="led" class="part" style="left:1010px; top:190px" data-pins='{"GND":[40,190],"VCC":[80,190],"DI":[120,190]}'>
+    <svg width="170" height="195" viewBox="0 0 170 195">
+      <defs><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#74c0fc"/><stop offset="1" stop-color="#1c7ed6" stop-opacity="0"/></radialGradient></defs>
+      <rect x="10" y="10" width="150" height="130" rx="12" fill="#1f2a44" stroke="#0b1220" stroke-width="2"/>
+      <circle cx="85" cy="62" r="46" fill="url(#glow)"/>
+      <rect x="66" y="43" width="38" height="38" rx="4" fill="#f1f3f5" stroke="#adb5bd"/><circle cx="85" cy="62" r="11" fill="#4dabf7"/>
+      <text x="85" y="118" font-family="Arial" font-size="13" font-weight="bold" fill="#e9ecef" text-anchor="middle">MKE-M22 · WS2812B</text>
+      <rect x="26" y="140" width="110" height="28" rx="4" fill="#f8f9fa" stroke="#868e96"/>
+      <g font-family="Arial" font-size="12" font-weight="bold" fill="#212529" text-anchor="middle"><text x="40" y="159">GND</text><text x="80" y="159">5V</text><text x="120" y="159">DI</text></g>
+      <g fill="#c0c4ca" stroke="#5c636b"><rect x="35" y="168" width="10" height="22"/><rect x="75" y="168" width="10" height="22"/><rect x="115" y="168" width="10" height="22"/></g>
+    </svg>
+  </div>
+
+  <!-- Mạch chuyển mức (tự vẽ) -->
+  <div id="lvl" class="part" style="left:480px; top:330px" data-pins='{"LV1": [0, 30], "LV2": [0, 55], "LV": [0, 80], "GNDL": [0, 105], "LV3": [0, 130], "LV4": [0, 155], "HV1": [200, 30], "HV2": [200, 55], "HV": [200, 80], "GNDH": [200, 105], "HV3": [200, 130], "HV4": [200, 155]}'>
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <defs><linearGradient id="pcbR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9363e"/><stop offset="1" stop-color="#a61e24"/></linearGradient></defs>
+      <rect x="2" y="8" width="196" height="172" rx="8" fill="url(#pcbR)" stroke="#6b1015" stroke-width="2"/>
+      <g fill="#1b1b1b"><rect x="87" y="22" width="26" height="16" rx="2"/><rect x="87" y="62" width="26" height="16" rx="2"/><rect x="87" y="112" width="26" height="16" rx="2"/><rect x="87" y="148" width="26" height="16" rx="2"/></g>
+      <g fill="#8a8f98"><rect x="66" y="27" width="12" height="6"/><rect x="122" y="27" width="12" height="6"/><rect x="66" y="67" width="12" height="6"/><rect x="122" y="67" width="12" height="6"/><rect x="66" y="117" width="12" height="6"/><rect x="122" y="117" width="12" height="6"/><rect x="66" y="153" width="12" height="6"/><rect x="122" y="153" width="12" height="6"/></g>
+      <g font-family="Arial" font-size="12" font-weight="bold" fill="#fff"><text x="22" y="34">LV1</text><text x="22" y="59">LV2</text><text x="22" y="84">LV</text><text x="22" y="109">GND</text><text x="22" y="134">LV3</text><text x="22" y="159">LV4</text><text x="178" y="34" text-anchor="end">HV1</text><text x="178" y="59" text-anchor="end">HV2</text><text x="178" y="84" text-anchor="end">HV</text><text x="178" y="109" text-anchor="end">GND</text><text x="178" y="134" text-anchor="end">HV3</text><text x="178" y="159" text-anchor="end">HV4</text></g>
+      <g fill="#e0b437" stroke="#7a5b10" stroke-width="1.5"><circle cx="10" cy="30" r="6"/><circle cx="10" cy="55" r="6"/><circle cx="10" cy="80" r="6"/><circle cx="10" cy="105" r="6"/><circle cx="10" cy="130" r="6"/><circle cx="10" cy="155" r="6"/><circle cx="190" cy="30" r="6"/><circle cx="190" cy="55" r="6"/><circle cx="190" cy="80" r="6"/><circle cx="190" cy="105" r="6"/><circle cx="190" cy="130" r="6"/><circle cx="190" cy="155" r="6"/></g>
+      <text x="100" y="196" font-family="Arial" font-size="10" fill="#6b1015" text-anchor="middle">trái: hàng LV (3,3 V) · phải: hàng HV (5 V)</text>
+    </svg>
+  </div>
+
+  <!-- GM65 (tự vẽ) -->
+  <div id="gm65" class="part" style="left:1520px; top:120px" data-pins='{"VCC":[110,336],"GND":[150,336],"TX":[190,336],"RX":[230,336]}'>
+    <svg width="330" height="345" viewBox="0 0 330 345">
+      <defs>
+        <linearGradient id="gmBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3d44"/><stop offset="1" stop-color="#16181c"/></linearGradient>
+        <radialGradient id="lens" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#7fa7d9"/><stop offset=".5" stop-color="#1c2b45"/><stop offset="1" stop-color="#05070c"/></radialGradient>
+      </defs>
+      <rect x="10" y="10" width="310" height="250" rx="22" fill="url(#gmBody)" stroke="#000" stroke-width="3"/>
+      <rect x="40" y="40" width="250" height="150" rx="14" fill="#0c0d10" stroke="#55585f" stroke-width="3"/>
+      <rect x="55" y="55" width="220" height="120" rx="8" fill="#101826" opacity=".95"/>
+      <circle cx="165" cy="115" r="34" fill="url(#lens)" stroke="#2c3440" stroke-width="5"/>
+      <circle cx="153" cy="103" r="8" fill="#ffffff" opacity=".35"/>
+      <circle cx="95" cy="115" r="11" fill="#ff3b30" opacity=".9"/><circle cx="235" cy="115" r="11" fill="#ff3b30" opacity=".9"/>
+      <circle cx="95" cy="115" r="20" fill="#ff3b30" opacity=".18"/><circle cx="235" cy="115" r="20" fill="#ff3b30" opacity=".18"/>
+      <text x="165" y="224" font-family="Arial" font-size="26" font-weight="bold" fill="#e9ecef" text-anchor="middle">GM65</text>
+      <text x="165" y="246" font-family="Arial" font-size="13" fill="#adb5bd" text-anchor="middle">1D/2D QR Barcode Scanner</text>
+      <rect x="85" y="262" width="170" height="44" rx="6" fill="#f8f9fa" stroke="#868e96" stroke-width="2"/>
+      <g font-family="Arial" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle"><text x="110" y="290">5V</text><text x="150" y="290">GND</text><text x="190" y="290">TX</text><text x="230" y="290">RX</text></g>
+      <g fill="#c0c4ca" stroke="#5c636b"><rect x="104" y="306" width="12" height="30"/><rect x="144" y="306" width="12" height="30"/><rect x="184" y="306" width="12" height="30"/><rect x="224" y="306" width="12" height="30"/></g>
+    </svg>
+  </div>
+
+  <!-- LM2596 có hiển thị (tự vẽ) -->
+  <div id="lm" class="part" style="left:470px; top:1250px" data-pins='{"IN+":[0,70],"IN-":[0,150],"OUT+":[400,70],"OUT-":[400,150]}'>
+    <svg width="400" height="220" viewBox="0 0 400 220">
+      <defs><linearGradient id="pcbB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d5fb8"/><stop offset="1" stop-color="#0f3c7a"/></linearGradient>
+        <radialGradient id="coil" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#3b3b3b"/><stop offset=".6" stop-color="#1e1e1e"/><stop offset="1" stop-color="#0a0a0a"/></radialGradient></defs>
+      <rect x="20" y="10" width="360" height="200" rx="10" fill="url(#pcbB)" stroke="#0a2850" stroke-width="2"/>
+      <rect x="150" y="34" width="120" height="58" rx="5" fill="#111"/>
+      <text x="210" y="80" font-family="'Courier New', monospace" font-size="40" font-weight="bold" fill="#ff3b3b" text-anchor="middle">5.00</text>
+      <circle cx="105" cy="120" r="42" fill="url(#coil)" stroke="#000"/><circle cx="105" cy="120" r="20" fill="#5a5a5a" opacity=".5"/>
+      <rect x="160" y="112" width="60" height="44" rx="3" fill="#202124"/><text x="190" y="138" font-family="Arial" font-size="11" fill="#bbb" text-anchor="middle">LM2596</text>
+      <rect x="236" y="110" width="30" height="30" rx="3" fill="#1c6dd0" stroke="#bcd" /><circle cx="251" cy="125" r="8" fill="#e9c46a" stroke="#7a5b10"/><text x="251" y="156" font-family="Arial" font-size="10" fill="#fff" text-anchor="middle">chỉnh</text>
+      <rect x="290" y="112" width="26" height="22" rx="4" fill="#ddd" stroke="#888"/><text x="303" y="150" font-family="Arial" font-size="10" fill="#fff" text-anchor="middle">nút</text>
+      <rect x="296" y="160" width="40" height="34" rx="18" fill="#1a1a1a"/><rect x="40" y="160" width="40" height="34" rx="18" fill="#1a1a1a"/>
+      <!-- cầu đấu -->
+      <g><rect x="0" y="45" width="34" height="130" rx="4" fill="#2f9e44" stroke="#1b5e20"/><circle cx="17" cy="70" r="9" fill="#b0b5bb" stroke="#555"/><circle cx="17" cy="150" r="9" fill="#b0b5bb" stroke="#555"/></g>
+      <g><rect x="366" y="45" width="34" height="130" rx="4" fill="#2f9e44" stroke="#1b5e20"/><circle cx="383" cy="70" r="9" fill="#b0b5bb" stroke="#555"/><circle cx="383" cy="150" r="9" fill="#b0b5bb" stroke="#555"/></g>
+      <g font-family="Arial" font-size="13" font-weight="bold" fill="#fff"><text x="40" y="58">IN+</text><text x="40" y="146">IN−</text><text x="322" y="58">OUT+</text><text x="322" y="146">OUT−</text></g>
+    </svg>
+  </div>
+
+  <!-- Hộp pin 2x18650 (tự vẽ) -->
+  <div id="pin" class="part" style="left:60px; top:1230px" data-pins='{"+":[330,60],"-":[330,190]}'>
+    <svg width="340" height="250" viewBox="0 0 340 250">
+      <defs><linearGradient id="cell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#57c785"/><stop offset=".5" stop-color="#2a9d5c"/><stop offset="1" stop-color="#156b3a"/></linearGradient></defs>
+      <rect x="10" y="20" width="300" height="210" rx="10" fill="#202225" stroke="#000" stroke-width="2"/>
+      <rect x="34" y="40" width="252" height="74" rx="36" fill="url(#cell)"/><rect x="34" y="136" width="252" height="74" rx="36" fill="url(#cell)"/>
+      <rect x="282" y="62" width="10" height="30" rx="3" fill="#ccc"/><rect x="28" y="158" width="10" height="30" rx="3" fill="#ccc"/>
+      <g font-family="Arial" font-weight="bold" fill="#fff"><text x="150" y="86" font-size="20" text-anchor="middle">18650 · 3,7 V</text><text x="150" y="182" font-size="20" text-anchor="middle">18650 · 3,7 V</text>
+        <text x="60" y="86" font-size="24">−</text><text x="250" y="86" font-size="24">+</text><text x="250" y="182" font-size="24">−</text><text x="60" y="182" font-size="24">+</text></g>
+    </svg>
+  </div>
+
+  <!-- Breadboard 400 lỗ (tự vẽ, chỉ hàng nguồn dùng tới) -->
+  <div id="bb" class="part" style="left:1020px; top:1250px"></div>
+
+  <svg id="wires" width="2400" height="1720"></svg>
+
+  <div class="note" style="left:1720px; top:1380px; width:600px">
+    <b>⚠ An toàn điện</b><br>
+    1. Chỉnh LM2596 ra đúng <b>5,0 V</b> (xem đồng hồ) <b>trước</b> khi nối OUT vào breadboard.<br>
+    2. ESP32 chỉ chịu 3,3 V: dây Uno ↔ ESP32 <b>luôn đi qua mạch chuyển mức</b>.<br>
+    3. Cắm USB để nạp chương trình: <b>tháo 1 viên pin</b> ra.<br>4. Không cần nút: GM65 <b>tự quét</b>, đưa thẻ vào là máy tự gửi lên web.
+  </div>
+</div>
+<script src="wokwi.js"></script>
+<script>
+// ---------- Breadboard ----------
+(function () {
+  const cols = 30, sx = 22, x0 = 46, W = cols * sx + 70, H = 430;
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect x="0" y="0" width="${W}" height="${H}" rx="14" fill="#f8f8f6" stroke="#c8c8c2" stroke-width="3"/>`;
+  const rails = { "P": 40, "N": 66, "Pd": H - 66, "Nd": H - 40 };
+  s += `<line x1="${x0 - 10}" y1="26" x2="${W - 30}" y2="26" stroke="#e03131" stroke-width="3"/><line x1="${x0 - 10}" y1="80" x2="${W - 30}" y2="80" stroke="#1c7ed6" stroke-width="3"/>`;
+  s += `<line x1="${x0 - 10}" y1="${H - 80}" x2="${W - 30}" y2="${H - 80}" stroke="#e03131" stroke-width="3"/><line x1="${x0 - 10}" y1="${H - 26}" x2="${W - 30}" y2="${H - 26}" stroke="#1c7ed6" stroke-width="3"/>`;
+  s += `<text x="18" y="46" font-family="Arial" font-weight="bold" font-size="22" fill="#e03131">+</text><text x="18" y="74" font-family="Arial" font-weight="bold" font-size="22" fill="#1c7ed6">−</text>`;
+  const pins = {};
+  for (const [k, y] of Object.entries(rails)) for (let i = 0; i < cols; i++) {
+    if (i % 6 === 5) continue;                      // khoảng trống giữa các nhóm 5 lỗ
+    const x = x0 + i * sx; s += `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" rx="1.5" fill="#3d3d3d"/>`; pins[k + "_" + i] = [x, y];
+  }
+  for (let r = 0; r < 10; r++) for (let i = 0; i < cols; i++) {
+    const y = 118 + r * 22 + (r >= 5 ? 26 : 0), x = x0 + i * sx; s += `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" rx="1.5" fill="#4a4a4a"/>`;
+  }
+  s += `<rect x="20" y="${118 + 4 * 22 + 14}" width="${W - 40}" height="10" rx="3" fill="#e4e4de"/>`;
+  s += `<text x="${W - 26}" y="${H - 6}" font-family="Arial" font-size="14" fill="#999" text-anchor="end">breadboard 400 lỗ</text></svg>`;
+  const bb = document.getElementById("bb"); bb.innerHTML = s; bb.dataset.pins = JSON.stringify(pins);
+})();
+
+function pinPos(id, name) {
+  const el = document.getElementById(id), r = el.getBoundingClientRect(), c = document.getElementById("canvas").getBoundingClientRect();
+  let p;
+  if (el.dataset.pins) { const q = JSON.parse(el.dataset.pins)[name]; if (!q) throw new Error(id + ":" + name); p = { x: q[0], y: q[1] }; }
+  else { p = el.pinInfo.find(q => q.name === name); if (!p) throw new Error(id + ":" + name); }
+  const sc = el.offsetWidth ? r.width / el.offsetWidth : 1;
+  return { x: r.left - c.left + p.x * sc, y: r.top - c.top + p.y * sc };
+}
+const D = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+const wires = [];
+function wire(a, b, color, da, db, k, via) { wires.push({ a, b, color, da, db, k, via }); }
+function draw() {
+  let s = "";
+  for (const w of wires) {
+    const A0 = pinPos(...w.a), B = pinPos(...w.b);
+    let pre = `M${A0.x},${A0.y}`, A = A0;
+    if (w.via) { for (const v of w.via) { const P = { x: v[0] === "a" ? A0.x + v[1] : v[0], y: v[2] === "a" ? A0.y + v[3] : v[2] }; pre += ` L${P.x},${P.y}`; A = P; } }
+    const L = w.k || Math.max(70, Math.hypot(B.x - A.x, B.y - A.y) * 0.45);
+    const c1 = { x: A.x + D[w.da][0] * L, y: A.y + D[w.da][1] * L }, c2 = { x: B.x + D[w.db][0] * L, y: B.y + D[w.db][1] * L };
+    const d = `${pre} C${c1.x},${c1.y} ${c2.x},${c2.y} ${B.x},${B.y}`;
+    s += `<path d="${d}" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="11" stroke-linecap="round" transform="translate(2,3)"/>`;
+    s += `<path d="${d}" fill="none" stroke="#1a1a1a" stroke-width="10" stroke-linecap="round"/>`;
+    s += `<path d="${d}" fill="none" stroke="${w.color}" stroke-width="7" stroke-linecap="round"/>`;
+    s += `<path d="${d}" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" transform="translate(-1,-1.5)"/>`;
+    for (const P of [A0, B]) s += `<rect x="${P.x - 7}" y="${P.y - 7}" width="14" height="14" rx="3" fill="#2b2b2b" stroke="#000"/>`;
+  }
+  document.getElementById("wires").innerHTML = s;
+}
+const RED = "#e03131", BLK = "#2b2b2b", ORG = "#f59f00";
+function build() {
+  document.getElementById("lcd").text = "H2O\nNuoc";
+  // Pin -> LM2596 -> breadboard
+  wire(["pin", "+"], ["lm", "IN+"], RED, "right", "left");
+  wire(["pin", "-"], ["lm", "IN-"], BLK, "right", "left");
+  wire(["lm", "OUT+"], ["bb", "P_1"], RED, "right", "up", 90);
+  wire(["lm", "OUT-"], ["bb", "N_2"], BLK, "right", "up", 120);
+  // Uno nguồn
+  wire(["uno", "5V"], ["bb", "P_12"], RED, "down", "up");
+  wire(["uno", "GND.2"], ["bb", "N_13"], BLK, "down", "up");
+  // ESP32 nguồn
+  wire(["esp", "5V"], ["bb", "P_3"], RED, "down", "up", 200, [["a",-24,"a",0],["a",-24,870,0]]);
+  wire(["esp", "GND_L"], ["bb", "N_4"], BLK, "down", "up", 200, [["a",-38,"a",0],["a",-38,880,0]]);
+  // ESP32 <-> chuyển mức
+  wire(["esp", "3V3"], ["lvl", "LV"], ORG, "down", "left", 60, [["a",-30,"a",0],["a",-30,185,0],[420,0,185,0]]);
+  wire(["esp", "GND_R"], ["lvl", "GNDL"], BLK, "right", "left");
+  wire(["esp", "P4"], ["lvl", "LV1"], "#8d5524", "right", "left");
+  wire(["esp", "P16"], ["lvl", "LV2"], "#0ca678", "right", "left");
+  wire(["lvl", "HV"], ["bb", "P_7"], RED, "right", "up", 200);
+  wire(["lvl", "GNDH"], ["bb", "N_8"], BLK, "right", "up", 220);
+  // chuyển mức -> Uno
+  wire(["lvl", "HV1"], ["uno", "7"], "#8d5524", "right", "up");
+  wire(["lvl", "HV2"], ["uno", "1"], "#0ca678", "right", "up", 260);
+  // Đèn LED RGB
+  wire(["led", "DI"], ["uno", "10"], "#e64980", "down", "up", 120);
+  wire(["led", "VCC"], ["bb", "P_20"], RED, "down", "up", 520);
+  wire(["led", "GND"], ["uno", "GND.1"], BLK, "down", "up", 90);
+  // GM65
+  wire(["gm65", "TX"], ["uno", "8"], "#2f9e44", "down", "up", 160);
+  wire(["gm65", "RX"], ["uno", "9"], "#fab005", "down", "up", 200);
+  wire(["gm65", "VCC"], ["bb", "P_26"], RED, "down", "up", 300);
+  wire(["gm65", "GND"], ["bb", "N_28"], BLK, "down", "up", 300);
+  // LCD
+  wire(["lcd", "SDA"], ["uno", "A4"], "#1c7ed6", "left", "down", 160);
+  wire(["lcd", "SCL"], ["uno", "A5"], "#9c36b5", "left", "down", 130);
+  wire(["lcd", "VCC"], ["bb", "P_22"], RED, "left", "up", 200);
+  wire(["lcd", "GND"], ["bb", "N_24"], BLK, "left", "up", 240);
+  draw();
+  // nhãn
+  const tag = (html, x, y) => { const d = document.createElement("div"); d.className = "tag"; d.innerHTML = html; d.style.left = x + "px"; d.style.top = y + "px"; document.getElementById("canvas").appendChild(d); };
+  tag("ESP32 NodeMCU-32S<small>38 chân · chữ in P16 = GPIO16, P4 = GPIO4</small>", 40, 100);
+  tag("Mạch chuyển mức<small>3,3 V ↔ 5 V</small>", 470, 270);
+  tag("Đèn LED RGB<small>xanh dương · vàng · xanh lá</small>", 1090, 130);
+  tag("GM65<small>đầu đọc QR</small>", 1880, 150);
+  tag("Arduino Uno<small>bộ não</small>", 820, 500);
+  tag("LCD 1602 + I2C", 1790, 660);
+  tag("Hộp pin 2×18650", 60, 1180);
+  tag("LM2596<small>chỉnh 5,0 V</small>", 520, 1180);
+  tag("Breadboard · thanh nguồn", 1060, 1195);
+}
+customElements.whenDefined("wokwi-arduino-uno").then(() => setTimeout(() => { try { build(); window.__ok = true; } catch (e) { window.__err = e.message; } }, 400));
+</script>
+</body></html>

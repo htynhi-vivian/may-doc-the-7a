@@ -1,0 +1,17 @@
+{
+  "name": "may-doc-the-firebase",
+  "version": "1.0.0",
+  "description": "Trang web Firebase nhận kết quả từ máy đọc thẻ ESP32-CAM",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild src/sdk_entry.js --bundle --minify --format=iife --target=es2019 --outfile=public/firebase_sdk.js",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "firebase": "^13.1.0"
+  }
+}
