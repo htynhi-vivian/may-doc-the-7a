@@ -25,7 +25,8 @@
  * Thư viện: LiquidCrystal I2C (Frank de Brabander). Wire, SoftwareSerial có sẵn.
  *
  * Nội dung mã QR: CT:H2O|Nuoc · NT:H · LENH:XONG · LENH:XOA
- * Serial Monitor (9600, Newline): gõ các mã trên, hoặc H,H,O.
+ * Serial Monitor (9600, Newline): gõ các mã trên, hoặc H,H,O. Lệnh #INFO: trả lời @{"mach":"uno",...}
+ * (trang web dùng lệnh này để nhận ra mạch khi cắm cáp USB).
  *
  * Máy KHÔNG tra bảng đáp án. Nó đếm nguyên tử, đếm nguyên tố, rồi áp quy tắc:
  *   1 nguyên tố -> ĐƠN CHẤT, từ 2 nguyên tố -> HỢP CHẤT;
@@ -644,7 +645,13 @@ void loop() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c == '\r' || c == '\n') {
-      if (lenUsb > 0) { bufUsb[lenUsb] = '\0'; lenUsb = 0; xuLyMa(bufUsb); }
+      if (lenUsb > 0) {
+        bufUsb[lenUsb] = '\0'; lenUsb = 0;
+        if (bufUsb[0] == '#') {                // lệnh của trang web (#INFO): báo đây là mạch Uno
+          Serial.print(F("@{\"loai\":\"info\",\"mach\":\"uno\",\"phien_ban\":\"uno-gm65-1.2\",\"mang\":"));
+          Serial.println(coMang ? F("true}") : F("false}"));
+        } else xuLyMa(bufUsb);
+      }
     } else if (lenUsb < sizeof(bufUsb) - 1) {
       bufUsb[lenUsb++] = c;
     }

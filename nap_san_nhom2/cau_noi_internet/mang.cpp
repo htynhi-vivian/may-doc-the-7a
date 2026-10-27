@@ -4,8 +4,9 @@
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <Preferences.h>
+#include "chuyen_doi.h"
 
-#define PHIEN_BAN "uno-gm65-1.1"
+#define PHIEN_BAN "uno-gm65-1.2"
 
 struct TinGui { char nut[24]; bool themMoi; char than[640]; };
 static QueueHandle_t hangDoiGui = nullptr;
@@ -15,6 +16,12 @@ static char ip[16] = "-";
 static String idToken, refreshToken;
 static unsigned long hetHanLuc = 0;      // millis() khi idToken hết hạn
 static Preferences nvs;
+
+// Cài đặt cài từ trang web (NVS "cai_dat"); tác vụ mạng chỉ đọc, đổi qua cờ doiWifi
+static Preferences caiDat;
+static char wifiTen[33] = "", wifiMk[65] = "", tenMay[21] = MAY_ID;
+static volatile bool doiWifi = false, canQuet = false;
+static volatile int lyDoRot = 0;          // lý do mất WiFi gần nhất (WIFI_REASON_*)
 
 // Lấy giá trị chuỗi của khóa trong JSON đơn giản: "khoa": "gia tri"
 static String layChuoi(const String& json, const char* khoa) {
@@ -76,8 +83,8 @@ static bool canDangNhap() { return idToken.length() == 0 || (long)(hetHanLuc - m
 
 static int ghiFirebase(const TinGui& t) {
   // Nhật ký để riêng ở /nhat_ky/<máy> cho trang "cả lớp" (đọc /may) luôn nhẹ
-  String duongDan = strcmp(t.nut, "nhat_ky") == 0 ? String("/nhat_ky/") + MAY_ID
-                                                  : String("/may/") + MAY_ID + "/" + t.nut;
+  String duongDan = strcmp(t.nut, "nhat_ky") == 0 ? String("/nhat_ky/") + tenMay
+                                                  : String("/may/") + tenMay + "/" + t.nut;
   String url = String(FIREBASE_DB_URL) + duongDan + ".json?auth=" + idToken;
   String tra;
   return goiHttps(url, t.themMoi ? "POST" : "PUT", String(t.than), "application/json", tra);
@@ -91,15 +98,44 @@ static void datHang(const char* nut, bool themMoi, const char* json) {
   }
 }
 
+// Dò WiFi (chạy trong tác vụ mạng để không giẫm lên WiFi.begin); in một dòng @{"loai":"wifi",...}
+static void quetWifi() {
+  if (WiFi.status() != WL_CONNECTED) WiFi.disconnect();
+  int n = WiFi.scanNetworks(false, false);
+  String ra = "@{\"loai\":\"wifi\",\"ds\":[";
+  int daIn = 0;
+  for (int i = 0; i < n && daIn < 25; i++) {
+    String ten = WiFi.SSID(i);
+    if (!ten.length()) continue;                      // mạng ẩn
+    bool trung = false;                               // nhiều điểm phát cùng tên: giữ cái mạnh nhất (đứng trước)
+    for (int j = 0; j < i && !trung; j++) trung = WiFi.SSID(j) == ten;
+    if (trung) continue;
+    char bTen[80], muc[140];
+    cdJsonChuoi(bTen, sizeof bTen, ten.c_str());
+    snprintf(muc, sizeof muc, "%s{\"ten\":%s,\"rssi\":%d,\"khoa\":%s}", daIn ? "," : "", bTen,
+             WiFi.RSSI(i), WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "false" : "true");
+    ra += muc; daIn++;
+  }
+  ra += "]}";
+  WiFi.scanDelete();
+  Serial.println(ra);
+}
+
 static void tacVuMang(void*) {
   unsigned long lanBaoTrangThai = 0, lanThuWifi = 0;
   for (;;) {
+    if (canQuet) { canQuet = false; quetWifi(); lanThuWifi = 0; }
+    if (doiWifi) {                         // vừa cài WiFi mới từ trang web: bỏ mạng cũ, nối lại ngay
+      doiWifi = false; lanThuWifi = 0; lyDoRot = 0;
+      WiFi.disconnect(); trangThai = MANG_CHUA_KET_NOI;
+      vTaskDelay(pdMS_TO_TICKS(200));
+    }
     if (WiFi.status() != WL_CONNECTED) {
       trangThai = MANG_CHUA_KET_NOI;
-      if (millis() - lanThuWifi > 10000 || lanThuWifi == 0) {
+      if (wifiTen[0] && (millis() - lanThuWifi > 10000 || lanThuWifi == 0)) {
         lanThuWifi = millis();
-        WiFi.disconnect(); WiFi.begin(WIFI_TEN, WIFI_MAT_KHAU);
-        Serial.printf("[WiFi] Dang ket noi \"%s\"...\n", WIFI_TEN);
+        WiFi.disconnect(); WiFi.begin(wifiTen, wifiMk);
+        Serial.printf("[WiFi] Dang ket noi \"%s\"...\n", wifiTen);
       }
       vTaskDelay(pdMS_TO_TICKS(500));
       continue;
@@ -136,6 +172,19 @@ void batDauMang() {
   hangDoiGui = xQueueCreate(8, sizeof(TinGui));
   nvs.begin("firebase", false);
   refreshToken = nvs.getString("rt", "");
+  caiDat.begin("cai_dat", false);
+  if (strcmp(WIFI_TEN, "Ten_WiFi") != 0) {               // cau_hinh.h đã điền: dùng làm mặc định
+    strncpy(wifiTen, WIFI_TEN, sizeof wifiTen - 1); strncpy(wifiMk, WIFI_MAT_KHAU, sizeof wifiMk - 1);
+  }
+  if (caiDat.isKey("ten")) {                             // đã cài từ trang web: ưu tiên
+    caiDat.getString("ten", wifiTen, sizeof wifiTen);
+    caiDat.getString("mk", wifiMk, sizeof wifiMk);
+  }
+  if (caiDat.isKey("may")) caiDat.getString("may", tenMay, sizeof tenMay);
+  WiFi.onEvent([](WiFiEvent_t, WiFiEventInfo_t info) {   // ghi lại lý do để báo "sai mật khẩu"
+    int r = info.wifi_sta_disconnected.reason;
+    if (r != WIFI_REASON_ASSOC_LEAVE) lyDoRot = r;          // bỏ qua lần ngắt do chính mình gọi disconnect()
+  }, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
   xTaskCreatePinnedToCore(tacVuMang, "mang", 12 * 1024, nullptr, 2, nullptr, 1);
@@ -145,3 +194,52 @@ bool guiGhiDe(const char* nut, const char* json) { if (!hangDoiGui) return false
 bool guiThemMoi(const char* nut, const char* json) { if (!hangDoiGui) return false; datHang(nut, true, json); return true; }
 TrangThaiMang trangThaiMang() { return trangThai; }
 const char* diaChiIP() { return ip; }
+
+const char* tenWifi() { return wifiTen; }
+const char* mayId() { return tenMay; }
+
+bool datWifi(const char* ten, const char* matKhau) {
+  size_t n = strlen(ten), m = strlen(matKhau);
+  if (n == 0 || n > 32 || m > 63 || (m > 0 && m < 8)) return false;   // WPA2: 8–63 ký tự, hoặc trống nếu mạng mở
+  caiDat.putString("ten", ten); caiDat.putString("mk", matKhau);
+  strncpy(wifiTen, ten, sizeof wifiTen - 1); wifiTen[sizeof wifiTen - 1] = '\0';
+  strncpy(wifiMk, matKhau, sizeof wifiMk - 1); wifiMk[sizeof wifiMk - 1] = '\0';
+  doiWifi = true;
+  return true;
+}
+
+bool datMayId(const char* id) {
+  size_t n = strlen(id);
+  if (n == 0 || n > 20) return false;
+  for (size_t i = 0; i < n; i++) {
+    char c = id[i];
+    if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')) return false;
+  }
+  caiDat.putString("may", id);
+  strncpy(tenMay, id, sizeof tenMay - 1); tenMay[sizeof tenMay - 1] = '\0';
+  return true;
+}
+
+void yeuCauQuetWifi() { canQuet = true; }
+
+// Trạng thái WiFi cho trang web: da_noi | dang_noi | chua_cai | sai_mat_khau | khong_thay_mang
+static const char* moTaWifi() {
+  if (!wifiTen[0]) return "chua_cai";
+  if (doiWifi) return "dang_noi";                        // WiFi mới chưa được tác vụ mạng áp dụng
+  if (WiFi.status() == WL_CONNECTED) return "da_noi";
+  int r = lyDoRot;
+  if (r == WIFI_REASON_NO_AP_FOUND) return "khong_thay_mang";
+  if (r == WIFI_REASON_AUTH_FAIL || r == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || r == WIFI_REASON_HANDSHAKE_TIMEOUT
+      || r == WIFI_REASON_AUTH_EXPIRE || r == WIFI_REASON_802_1X_AUTH_FAILED) return "sai_mat_khau";
+  return "dang_noi";
+}
+
+void inThongTin() {
+  static const char* const FB[] = { "chua_noi", "chua_noi", "san_sang", "loi" };   // theo TrangThaiMang
+  char bTen[80], bMay[48];
+  cdJsonChuoi(bTen, sizeof bTen, wifiTen); cdJsonChuoi(bMay, sizeof bMay, tenMay);
+  bool coWifi = WiFi.status() == WL_CONNECTED;
+  Serial.printf("@{\"loai\":\"info\",\"mach\":\"esp32\",\"phien_ban\":\"%s\",\"may\":%s,\"wifi_ten\":%s,"
+                "\"wifi\":\"%s\",\"ip\":\"%s\",\"rssi\":%d,\"firebase\":\"%s\"}\n",
+                PHIEN_BAN, bMay, bTen, moTaWifi(), coWifi ? ip : "-", coWifi ? WiFi.RSSI() : 0, doiWifi ? "chua_noi" : FB[trangThai]);
+}

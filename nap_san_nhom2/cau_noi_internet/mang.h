@@ -4,6 +4,8 @@
  * không làm chậm việc đọc thẻ và đổi màn LCD.
  * Đăng nhập Firebase bằng tài khoản ẩn danh (Anonymous); khóa làm mới
  * được lưu trong bộ nhớ NVS nên khởi động lại không tạo tài khoản mới.
+ * Tên/mật khẩu WiFi và tên máy cũng lưu trong NVS, cài từ trang web qua cáp USB
+ * (xem lenh_usb.h); chưa cài thì dùng giá trị trong cau_hinh.h.
  * ============================================================ */
 #pragma once
 #include <Arduino.h>
@@ -17,3 +19,14 @@ bool guiGhiDe(const char* nut, const char* json);
 bool guiThemMoi(const char* nut, const char* json);
 TrangThaiMang trangThaiMang();
 const char* diaChiIP();
+
+// ---- Cài đặt lưu trong NVS (đổi được qua cáp USB, không cần nạp lại) ----
+const char* tenWifi();
+const char* mayId();
+// Lưu WiFi mới và kết nối lại ngay. Trả về false nếu tên/mật khẩu không hợp lệ.
+bool datWifi(const char* ten, const char* matKhau);
+bool datMayId(const char* id);
+// Yêu cầu dò WiFi; kết quả in ra Serial (một dòng @{"loai":"wifi",...}) khi dò xong
+void yeuCauQuetWifi();
+// In một dòng @{"loai":"info",...} ra Serial: trạng thái WiFi, Firebase, tên máy
+void inThongTin();

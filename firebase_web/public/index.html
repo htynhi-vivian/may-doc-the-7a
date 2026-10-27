@@ -129,6 +129,28 @@ details.sim summary{cursor:pointer;font-weight:700;color:var(--purple)}
 .banner{border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:.92rem}
 .banner.demo{background:var(--purpleSoft);color:#4c1d95}
 .banner.err{background:var(--redSoft);color:#9b1c1c}
+/* ---- Cài đặt mạch qua USB ---- */
+.usbgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:980px){.usbgrid{grid-template-columns:1fr}}
+.hint{color:var(--muted);font-size:.9rem;margin:6px 0 0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+fieldset:disabled{opacity:.5}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0 0;font-size:.92rem}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.log.mono li{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
+.wifis{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;max-height:260px;overflow:auto}
+.wifis button{width:100%;display:flex;gap:10px;align-items:center;background:var(--bg);color:var(--ink);font-weight:600;text-align:left;border:1px solid var(--line)}
+.wifis button[aria-pressed="true"]{border-color:var(--blue);background:var(--blueSoft)}
+.wifis .ten{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wifis .k{color:var(--muted);font-size:.85rem;font-weight:400}
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:14px}
+.bars i{width:4px;background:var(--line);border-radius:1px;display:block}
+.bars i.on{background:var(--green)}
+.field{display:grid;gap:4px;margin-top:10px}
+.field label{font-size:.85rem;font-weight:700;color:var(--muted)}
+.field input,#usbMay{font:inherit;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);color:var(--ink);min-width:0;width:100%}
+.pw{display:flex;gap:6px}.pw input{flex:1}
+.evt.ok{background:var(--greenSoft);color:#08604b}.evt.wait{background:var(--amberSoft);color:#7a4a00}
 </style>
 </head>
 <body>
@@ -142,6 +164,7 @@ details.sim summary{cursor:pointer;font-weight:700;color:var(--purple)}
     <div class="tabs" role="group" aria-label="Chế độ xem">
       <button id="tabMot" aria-pressed="true">Một máy</button>
       <button id="tabLop" aria-pressed="false">Cả lớp</button>
+      <button id="tabUsb" aria-pressed="false">Cài đặt mạch (USB)</button>
     </div>
     <label class="chk" for="may">Máy:</label>
     <select id="may" aria-label="Chọn máy đọc thẻ"><option value="">(chưa có máy nào)</option></select>
@@ -155,6 +178,56 @@ details.sim summary{cursor:pointer;font-weight:700;color:var(--purple)}
 
 <section id="viewLop" hidden>
   <div class="class" id="class"></div>
+</section>
+
+<section id="viewUsb" hidden>
+  <div class="usbgrid">
+    <section class="panel">
+      <b>1. Kiểm tra mạch</b>
+      <p class="hint">Cắm mạch vào máy tính bằng cáp USB, bấm nút dưới đây rồi chọn cổng của mạch (thường có tên <i>CP210x</i>, <i>CH340</i> hoặc <i>USB Serial</i>). Cắm <b>ESP32</b> để cài WiFi; cắm <b>Arduino Uno</b> để kiểm tra mạch đọc thẻ.</p>
+      <div class="warnbox" id="usbNoApi" hidden>Trình duyệt này chưa hỗ trợ kết nối USB. Hãy mở trang bằng <b>Google Chrome</b> hoặc <b>Microsoft Edge</b> trên máy tính.</div>
+      <div class="row">
+        <button id="usbConnect">Kiểm tra mạch (USB)</button>
+        <button class="ghost" id="usbInfo" hidden>Kiểm tra lại</button>
+        <button class="ghost" id="usbClose" hidden>Ngắt kết nối</button>
+      </div>
+      <div class="status">
+        <div class="pill idle" id="usbBoard"><b>Mạch</b>Chưa kết nối</div>
+        <div class="pill idle" id="usbNet"><b>Internet</b>—</div>
+      </div>
+      <dl class="kv" id="usbKv" hidden></dl>
+      <h2>Mạch đang gửi (Serial Monitor)</h2>
+      <ul class="log mono" id="usbLog"><li class="empty">Chưa có dữ liệu.</li></ul>
+    </section>
+
+    <section class="panel" id="usbEsp">
+      <b>2. Cài WiFi cho ESP32</b>
+      <p class="hint" id="usbEspHint">Kết nối ESP32 ở bước 1 trước. Chỉ dùng được WiFi <b>2,4 GHz</b>.</p>
+      <fieldset id="usbEspForm" disabled>
+        <div class="row">
+          <button id="usbScan">Dò WiFi</button>
+          <span class="hint" id="usbScanNote"></span>
+        </div>
+        <ul class="wifis" id="usbWifis"></ul>
+        <div class="field">
+          <label for="usbSsid">Tên WiFi</label>
+          <input id="usbSsid" maxlength="32" autocomplete="off" placeholder="Chọn ở danh sách hoặc gõ tên">
+        </div>
+        <div class="field">
+          <label for="usbPass">Mật khẩu</label>
+          <div class="pw"><input id="usbPass" type="password" maxlength="63" autocomplete="new-password" placeholder="8–63 ký tự, để trống nếu WiFi không khóa"><button class="ghost" id="usbShow" type="button" aria-pressed="false">Hiện</button></div>
+        </div>
+        <div class="row"><button class="green" id="usbSave">Lưu vào ESP32 và kết nối</button></div>
+        <div class="evt" id="usbWifiMsg" hidden></div>
+        <h2>Tên máy</h2>
+        <div class="row">
+          <input id="usbMay" maxlength="20" autocomplete="off" aria-label="Tên máy" placeholder="nhom1" style="max-width:180px">
+          <button class="ghost" id="usbMaySave">Lưu tên máy</button>
+        </div>
+        <p class="hint">Tên máy là tên nhóm hiện ở ô <b>Máy</b> và trang <b>Cả lớp</b>: chữ thường không dấu, số, - hoặc _ (tối đa 20 ký tự).</p>
+      </fieldset>
+    </section>
+  </div>
 </section>
 
 <div class="grid" id="viewMot">
@@ -216,5 +289,6 @@ details.sim summary{cursor:pointer;font-weight:700;color:var(--purple)}
 <script src="theory.js"></script>
 <script src="render.js"></script>
 <script src="app.js"></script>
+<script src="usb.js"></script>
 </body>
 </html>

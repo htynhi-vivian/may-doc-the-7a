@@ -4,6 +4,8 @@
 #pragma once
 
 // ---- 1. WiFi của trường / phòng học (chỉ WiFi 2,4 GHz) ----
+// KHÔNG cần sửa: cắm cáp USB vào ESP32, mở trang web > "Cài đặt mạch (USB)" để dò WiFi và nhập mật khẩu.
+// WiFi cài từ trang web được lưu trong ESP32 và được ưu tiên hơn hai dòng dưới đây.
 #define WIFI_TEN          "Ten_WiFi"
 #define WIFI_MAT_KHAU     "Mat_khau_WiFi"
 
@@ -12,7 +14,7 @@
 // Chép nguyên văn địa chỉ Realtime Database, KHÔNG có dấu / ở cuối.
 #define FIREBASE_DB_URL   "https://may-doc-the-7a-default-rtdb.asia-southeast1.firebasedatabase.app"
 
-// ---- 3. Tên máy: mỗi nhóm một tên khác nhau ----
+// ---- 3. Tên máy: mỗi nhóm một tên khác nhau (đổi được ở trang web, mục "Cài đặt mạch (USB)") ----
 // Chỉ dùng chữ thường không dấu, số, dấu - hoặc _ (tối đa 20 ký tự). Ví dụ: nhom1, nhom2
 #define MAY_ID            "nhom1"
 

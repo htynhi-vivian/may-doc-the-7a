@@ -25,6 +25,7 @@ Tác giả: Trí Huệ.
 
 ## Lưu ý
 
-- Điền tên và mật khẩu WiFi trong `cau_hinh.h` trên máy của mình, **không commit mật khẩu WiFi** lên GitHub.
+- **Cài WiFi không cần sửa mã:** nạp chương trình cho ESP32 một lần, cắm cáp USB vào ESP32, mở trang web bằng Chrome/Edge trên máy tính, chọn tab **Cài đặt mạch (USB)** › **Kiểm tra mạch** › **Dò WiFi** › nhập mật khẩu › **Lưu**. ESP32 nhớ WiFi và tên máy cả khi mất điện. Cắm Arduino Uno thì trang nhận ra mạch đọc thẻ và hiện các dòng kết quả.
+- Nếu vẫn điền WiFi trong `cau_hinh.h` thì **không commit mật khẩu WiFi** lên GitHub.
 - Khóa `apiKey` Firebase trong `cau_hinh_firebase.js` là khóa web công khai theo thiết kế của Firebase; dữ liệu được bảo vệ bằng `database.rules.json`.
 - Đăng trang web: trong `firebase_web/` chạy `firebase login` rồi `firebase deploy` → https://may-doc-the-7a.web.app

@@ -283,12 +283,13 @@
   }
   $("class").addEventListener("click", (ev) => { const b = ev.target.closest(".mcard"); if (b) { selectMay(b.dataset.id, true); setView("mot"); } });
   function setView(v) {
-    $("tabMot").setAttribute("aria-pressed", v === "mot"); $("tabLop").setAttribute("aria-pressed", v === "lop");
-    $("viewMot").hidden = v !== "mot"; $("viewLop").hidden = v !== "lop";
-    const u = new URL(location.href); v === "lop" ? u.searchParams.set("xem", "lop") : u.searchParams.delete("xem"); history.replaceState(null, "", u);
+    $("tabMot").setAttribute("aria-pressed", v === "mot"); $("tabLop").setAttribute("aria-pressed", v === "lop"); $("tabUsb").setAttribute("aria-pressed", v === "usb");
+    $("viewMot").hidden = v !== "mot"; $("viewLop").hidden = v !== "lop"; $("viewUsb").hidden = v !== "usb";
+    const u = new URL(location.href); v !== "mot" ? u.searchParams.set("xem", v) : u.searchParams.delete("xem"); history.replaceState(null, "", u);
   }
   $("tabMot").onclick = () => setView("mot");
   $("tabLop").onclick = () => setView("lop");
+  $("tabUsb").onclick = () => setView("usb");
 
   // ================= NHẬN DỮ LIỆU =================
   function onMay() {
@@ -321,7 +322,7 @@
   });
   setInterval(() => { renderStatus(); renderClass(); }, 15000);   // cập nhật trực tuyến / ngoại tuyến theo thời gian
   if (chon) selectMay(chon, true); else lcd("  CHUA CO MAY", "", { off: true });
-  if (params.get("xem") === "lop") setView("lop");
+  if (params.get("xem") === "lop" || params.get("xem") === "usb") setView(params.get("xem"));
 
   // ================= MÁY GIẢ LẬP (cùng quy tắc với firmware ESP32-CAM) =================
   const Sim = (() => {
