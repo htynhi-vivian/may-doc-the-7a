@@ -1,15 +1,15 @@
-# Firebase đã cài đặt (27/10/2026)
+# Firebase đã cài đặt (chuyển dự án 28/10/2026)
 
 | Mục | Giá trị |
 |---|---|
-| Tài khoản Google | trihue.life@gmail.com |
+| Tài khoản Google | htynhi@gds.edu.vn |
 | Tên dự án | may-doc-the-7a |
-| Mã dự án (Project ID) | `may-doc-the-7a-a2195` |
-| Realtime Database | `https://may-doc-the-7a-a2195-default-rtdb.asia-southeast1.firebasedatabase.app` (Singapore, gói Spark miễn phí) |
-| Đăng nhập | Anonymous: đã bật |
+| Mã dự án (Project ID) | `may-doc-the-7a` |
+| Realtime Database | `https://may-doc-the-7a-default-rtdb.asia-southeast1.firebasedatabase.app` (Singapore, gói Spark miễn phí) |
+| Đăng nhập | Anonymous: **cần bật trong Console** (Authentication > Sign-in method) |
 | Quy tắc dữ liệu | Đã đăng bản `database.rules.json` |
-| Web app | `trang-web-lop` (appId `1:748316192982:web:da119718a4aae1b7ea5977`) |
-| Link trang web (sau khi deploy) | `https://may-doc-the-7a-a2195.web.app` |
+| Web app | `trang-web-lop` (appId `1:171313410584:web:65b5aaf0468d1a44f7496d`) |
+| Link trang web | https://may-doc-the-7a.web.app (đã deploy 28/10/2026) |
 
 ## Đã kiểm tra thật trên Firebase
 - Đăng nhập ẩn danh bằng khóa web: thành công.

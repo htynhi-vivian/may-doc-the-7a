@@ -16,7 +16,7 @@ Tác giả: Trí Huệ.
 | `hinh/` | Sơ đồ khối, sơ đồ nối dây, lắp mạch bằng linh kiện thật |
 | `don_hang/` | Đơn hàng Hshop (đơn chính + đơn bổ sung) |
 | `HUONG_DAN_UNO_GM65_TU_DONG.md` | Hướng dẫn lắp, nạp, dùng trong lớp |
-| `FIREBASE_DA_CAI_DAT.md` | Thông tin dự án Firebase `may-doc-the-7a-a2195` |
+| `FIREBASE_DA_CAI_DAT.md` | Thông tin dự án Firebase `may-doc-the-7a` |
 | `BAO_CAO_KC-REPORT-20261024-012.md` | Báo cáo kỹ thuật |
 
 ## Đèn LED
@@ -27,4 +27,4 @@ Tác giả: Trí Huệ.
 
 - Điền tên và mật khẩu WiFi trong `cau_hinh.h` trên máy của mình, **không commit mật khẩu WiFi** lên GitHub.
 - Khóa `apiKey` Firebase trong `cau_hinh_firebase.js` là khóa web công khai theo thiết kế của Firebase; dữ liệu được bảo vệ bằng `database.rules.json`.
-- Đăng trang web: trong `firebase_web/` chạy `firebase login` rồi `firebase deploy` → https://may-doc-the-7a-a2195.web.app
+- Đăng trang web: trong `firebase_web/` chạy `firebase login` rồi `firebase deploy` → https://may-doc-the-7a.web.app

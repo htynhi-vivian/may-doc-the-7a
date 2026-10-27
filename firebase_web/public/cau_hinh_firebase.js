@@ -5,9 +5,9 @@
  * Chưa dán (apiKey còn "DAN_VAO_DAY") thì trang tự chạy CHẾ ĐỘ THỬ: không cần Internet, có máy giả lập.
  * ============================================================ */
 window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBN9AP0n68NX-r3bMDFudrte39BQkITHxg",
-  authDomain: "may-doc-the-7a-a2195.firebaseapp.com",
-  databaseURL: "https://may-doc-the-7a-a2195-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "may-doc-the-7a-a2195",
-  appId: "1:748316192982:web:da119718a4aae1b7ea5977"
+  apiKey: "AIzaSyCxDNjSZ9nKztqIFvpiI-xjYt2yXixUD-U",
+  authDomain: "may-doc-the-7a.firebaseapp.com",
+  databaseURL: "https://may-doc-the-7a-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "may-doc-the-7a",
+  appId: "1:171313410584:web:65b5aaf0468d1a44f7496d"
 };

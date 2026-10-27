@@ -8,9 +8,9 @@
 #define WIFI_MAT_KHAU     "Mat_khau_WiFi"
 
 // ---- 2. Firebase (lấy trong Firebase console, xem hướng dẫn) ----
-#define FIREBASE_API_KEY  "AIzaSyBN9AP0n68NX-r3bMDFudrte39BQkITHxg"
+#define FIREBASE_API_KEY  "AIzaSyCxDNjSZ9nKztqIFvpiI-xjYt2yXixUD-U"
 // Chép nguyên văn địa chỉ Realtime Database, KHÔNG có dấu / ở cuối.
-#define FIREBASE_DB_URL   "https://may-doc-the-7a-a2195-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define FIREBASE_DB_URL   "https://may-doc-the-7a-default-rtdb.asia-southeast1.firebasedatabase.app"
 
 // ---- 3. Tên máy: mỗi nhóm một tên khác nhau ----
 // Chỉ dùng chữ thường không dấu, số, dấu - hoặc _ (tối đa 20 ký tự). Ví dụ: nhom1, nhom2
