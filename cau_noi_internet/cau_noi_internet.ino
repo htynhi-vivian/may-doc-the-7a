@@ -9,7 +9,7 @@
  *   2. Kéo chân GPIO4 xuống THẤP khi đã nối Firebase, để LCD của Uno hiện "Da noi Internet"
  * Mạch này KHÔNG suy luận: mọi kết luận về chất đều do Arduino Uno đưa ra.
  *
- * Bo mạch trong Arduino IDE: esp32 > NodeMCU-32S. Nạp xong, cài WiFi và tên máy ở trang web
+ * Bo mạch trong Arduino IDE: esp32 > NodeMCU-32S. Nạp xong, cài WiFi ở trang web
  * (tab "Cài đặt mạch (USB)", cắm cáp USB vào ESP32), không cần sửa cau_hinh.h.
  */
 #include "cau_hinh.h"
@@ -41,10 +41,9 @@ void xuLyDongUno(char* d) {
 }
 
 /* Lệnh từ trang web qua cáp USB (Serial 115200), mỗi lệnh một dòng, các trường cách nhau bằng TAB:
- *   #INFO                    -> @{"loai":"info",...}   trạng thái WiFi, Firebase, tên máy
+ *   #INFO                    -> @{"loai":"info",...}   trạng thái WiFi, Firebase
  *   #QUET                    -> @{"loai":"wifi","ds":[...]}   các mạng WiFi quanh máy
  *   #WIFI <ten> <mat_khau>   -> @{"loai":"da_luu"} hoặc @{"loai":"loi",...}; lưu NVS, nối lại ngay
- *   #MAY <ten_may>           -> như trên; đổi tên máy (MAY_ID) không cần nạp lại
  * Dòng trả lời bắt đầu bằng @ để trang web tách khỏi các dòng nhật ký. */
 void traLoi(bool ok, const char* loi) {
   if (ok) Serial.println("@{\"loai\":\"da_luu\"}");
@@ -61,7 +60,6 @@ bool xuLyLenhUsb(char* d) {
   if (!strcmp(d, "#INFO")) inThongTin();
   else if (!strcmp(d, "#QUET")) yeuCauQuetWifi();
   else if (!strcmp(d, "#WIFI")) traLoi(t[1] && datWifi(t[1], t[2] ? t[2] : ""), "Ten WiFi 1-32 ky tu, mat khau 8-63 ky tu");
-  else if (!strcmp(d, "#MAY")) traLoi(t[1] && datMayId(t[1]), "Ten may: chu thuong khong dau, so, - hoac _");
   else traLoi(false, "Lenh khong ro");
   return true;
 }

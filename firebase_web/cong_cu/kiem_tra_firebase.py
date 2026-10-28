@@ -35,7 +35,7 @@ def main():
     a = ap.parse_args()
     db = a.db_url.rstrip("/")
     if not re.fullmatch(r"[a-z0-9_-]{1,20}", a.may):
-        print("Tên máy chỉ gồm chữ thường không dấu, số, dấu - hoặc _ (tối đa 20 ký tự). Ví dụ: nhom1"); sys.exit(2)
+        print("Tên máy chỉ gồm chữ thường không dấu, số, dấu - hoặc _ (tối đa 20 ký tự). Ví dụ: may7a"); sys.exit(2)
     ok = True
 
     print("1. Đăng nhập ẩn danh ...", end=" ")

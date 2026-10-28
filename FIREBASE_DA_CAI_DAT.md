@@ -18,9 +18,9 @@
 
 ## Đã điền sẵn trong gói
 - `firebase_web/public/cau_hinh_firebase.js`, `firebase_web/.firebaserc`
-- `nap_san_nhom1/cau_noi_internet/` (MAY_ID = nhom1), `nap_san_nhom2/cau_noi_internet/` (MAY_ID = nhom2): biên dịch đạt (78 % flash).
+- `cau_noi_internet/cau_hinh.h`: khóa Firebase, địa chỉ cơ sở dữ liệu, tên máy `may7a` (chỉ có một máy).
 
 ## Còn lại thầy làm
-1. Sửa `WIFI_TEN`, `WIFI_MAT_KHAU` trong `cau_hinh.h` của mỗi bản nạp sẵn (WiFi 2,4 GHz).
-2. Nạp `nap_san_nhom1` cho ESP32 bộ 1, `nap_san_nhom2` cho bộ 2.
-3. Đăng trang web: trong thư mục `firebase_web` chạy `npm install -g firebase-tools`, `firebase login`, `firebase deploy`.
+1. Nạp `cau_noi_internet` cho ESP32 và `may_doc_the_internet` cho Arduino Uno.
+2. Cài WiFi: cắm USB vào ESP32, mở trang web › tab **Cài đặt mạch (USB)** › **Dò WiFi** › nhập mật khẩu › **Lưu**.
+3. Trang web đã đăng sẵn ở https://may-doc-the-7a.web.app (đăng lại: trong `firebase_web` chạy `firebase deploy`).

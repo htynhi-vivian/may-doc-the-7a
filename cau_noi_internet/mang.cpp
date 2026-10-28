@@ -17,9 +17,9 @@ static String idToken, refreshToken;
 static unsigned long hetHanLuc = 0;      // millis() khi idToken hết hạn
 static Preferences nvs;
 
-// Cài đặt cài từ trang web (NVS "cai_dat"); tác vụ mạng chỉ đọc, đổi qua cờ doiWifi
+// WiFi cài từ trang web (NVS "cai_dat"); tác vụ mạng chỉ đọc, đổi qua cờ doiWifi
 static Preferences caiDat;
-static char wifiTen[33] = "", wifiMk[65] = "", tenMay[21] = MAY_ID;
+static char wifiTen[33] = "", wifiMk[65] = "";
 static volatile bool doiWifi = false, canQuet = false;
 static volatile int lyDoRot = 0;          // lý do mất WiFi gần nhất (WIFI_REASON_*)
 
@@ -82,9 +82,9 @@ static bool dangNhap() {
 static bool canDangNhap() { return idToken.length() == 0 || (long)(hetHanLuc - millis()) < 5 * 60 * 1000L; }
 
 static int ghiFirebase(const TinGui& t) {
-  // Nhật ký để riêng ở /nhat_ky/<máy> cho trang "cả lớp" (đọc /may) luôn nhẹ
-  String duongDan = strcmp(t.nut, "nhat_ky") == 0 ? String("/nhat_ky/") + tenMay
-                                                  : String("/may/") + tenMay + "/" + t.nut;
+  // Nhật ký để riêng ở /nhat_ky/<máy> để nút /may (trang web theo dõi liên tục) luôn nhẹ
+  String duongDan = strcmp(t.nut, "nhat_ky") == 0 ? String("/nhat_ky/") + MAY_ID
+                                                  : String("/may/") + MAY_ID + "/" + t.nut;
   String url = String(FIREBASE_DB_URL) + duongDan + ".json?auth=" + idToken;
   String tra;
   return goiHttps(url, t.themMoi ? "POST" : "PUT", String(t.than), "application/json", tra);
@@ -180,7 +180,6 @@ void batDauMang() {
     caiDat.getString("ten", wifiTen, sizeof wifiTen);
     caiDat.getString("mk", wifiMk, sizeof wifiMk);
   }
-  if (caiDat.isKey("may")) caiDat.getString("may", tenMay, sizeof tenMay);
   WiFi.onEvent([](WiFiEvent_t, WiFiEventInfo_t info) {   // ghi lại lý do để báo "sai mật khẩu"
     int r = info.wifi_sta_disconnected.reason;
     if (r != WIFI_REASON_ASSOC_LEAVE) lyDoRot = r;          // bỏ qua lần ngắt do chính mình gọi disconnect()
@@ -196,7 +195,6 @@ TrangThaiMang trangThaiMang() { return trangThai; }
 const char* diaChiIP() { return ip; }
 
 const char* tenWifi() { return wifiTen; }
-const char* mayId() { return tenMay; }
 
 bool datWifi(const char* ten, const char* matKhau) {
   size_t n = strlen(ten), m = strlen(matKhau);
@@ -205,18 +203,6 @@ bool datWifi(const char* ten, const char* matKhau) {
   strncpy(wifiTen, ten, sizeof wifiTen - 1); wifiTen[sizeof wifiTen - 1] = '\0';
   strncpy(wifiMk, matKhau, sizeof wifiMk - 1); wifiMk[sizeof wifiMk - 1] = '\0';
   doiWifi = true;
-  return true;
-}
-
-bool datMayId(const char* id) {
-  size_t n = strlen(id);
-  if (n == 0 || n > 20) return false;
-  for (size_t i = 0; i < n; i++) {
-    char c = id[i];
-    if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')) return false;
-  }
-  caiDat.putString("may", id);
-  strncpy(tenMay, id, sizeof tenMay - 1); tenMay[sizeof tenMay - 1] = '\0';
   return true;
 }
 
@@ -236,10 +222,10 @@ static const char* moTaWifi() {
 
 void inThongTin() {
   static const char* const FB[] = { "chua_noi", "chua_noi", "san_sang", "loi" };   // theo TrangThaiMang
-  char bTen[80], bMay[48];
-  cdJsonChuoi(bTen, sizeof bTen, wifiTen); cdJsonChuoi(bMay, sizeof bMay, tenMay);
+  char bTen[80];
+  cdJsonChuoi(bTen, sizeof bTen, wifiTen);
   bool coWifi = WiFi.status() == WL_CONNECTED;
-  Serial.printf("@{\"loai\":\"info\",\"mach\":\"esp32\",\"phien_ban\":\"%s\",\"may\":%s,\"wifi_ten\":%s,"
+  Serial.printf("@{\"loai\":\"info\",\"mach\":\"esp32\",\"phien_ban\":\"%s\",\"may\":\"%s\",\"wifi_ten\":%s,"
                 "\"wifi\":\"%s\",\"ip\":\"%s\",\"rssi\":%d,\"firebase\":\"%s\"}\n",
-                PHIEN_BAN, bMay, bTen, moTaWifi(), coWifi ? ip : "-", coWifi ? WiFi.RSSI() : 0, doiWifi ? "chua_noi" : FB[trangThai]);
+                PHIEN_BAN, MAY_ID, bTen, moTaWifi(), coWifi ? ip : "-", coWifi ? WiFi.RSSI() : 0, doiWifi ? "chua_noi" : FB[trangThai]);
 }

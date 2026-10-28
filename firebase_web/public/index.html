@@ -113,19 +113,6 @@ details.sim summary{cursor:pointer;font-weight:700;color:var(--purple)}
 .sim .row input,.sim .row select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);color:var(--ink);min-width:0}
 .sim .row input{flex:1}
 .sim small{display:block;color:var(--muted);margin-top:6px;font-size:.82rem}
-.class{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-.mcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;color:var(--ink);font-weight:400;cursor:pointer;display:block;width:100%}
-.mcard:hover{border-color:var(--blue)}
-.mcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.mcard .id{font-weight:800;font-size:1.05rem}
-.mcard .on{font-size:.75rem;font-weight:700;border-radius:99px;padding:2px 9px}
-.mcard .on.y{background:var(--greenSoft);color:#08604b}.mcard .on.n{background:var(--bg);color:var(--muted)}
-.mcard .f{font-size:2rem;font-weight:800;line-height:1.15;margin-top:6px}
-.mcard .f sub{font-size:.55em}
-.mcard .k{font-size:.85rem;color:var(--muted)}
-.mcard.moi{animation:moi 1.6s ease-out}
-@keyframes moi{0%{box-shadow:0 0 0 4px var(--amber)}100%{box-shadow:0 0 0 0 transparent}}
-.emptyclass{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 10px}
 .banner{border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:.92rem}
 .banner.demo{background:var(--purpleSoft);color:#4c1d95}
 .banner.err{background:var(--redSoft);color:#9b1c1c}
@@ -148,7 +135,7 @@ fieldset:disabled{opacity:.5}
 .bars i.on{background:var(--green)}
 .field{display:grid;gap:4px;margin-top:10px}
 .field label{font-size:.85rem;font-weight:700;color:var(--muted)}
-.field input,#usbMay{font:inherit;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);color:var(--ink);min-width:0;width:100%}
+.field input{font:inherit;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);color:var(--ink);min-width:0;width:100%}
 .pw{display:flex;gap:6px}.pw input{flex:1}
 .evt.ok{background:var(--greenSoft);color:#08604b}.evt.wait{background:var(--amberSoft);color:#7a4a00}
 </style>
@@ -162,12 +149,9 @@ fieldset:disabled{opacity:.5}
   </div>
   <div class="tools">
     <div class="tabs" role="group" aria-label="Chế độ xem">
-      <button id="tabMot" aria-pressed="true">Một máy</button>
-      <button id="tabLop" aria-pressed="false">Cả lớp</button>
+      <button id="tabMot" aria-pressed="true">Kết quả quét</button>
       <button id="tabUsb" aria-pressed="false">Cài đặt mạch (USB)</button>
     </div>
-    <label class="chk" for="may">Máy:</label>
-    <select id="may" aria-label="Chọn máy đọc thẻ"><option value="">(chưa có máy nào)</option></select>
     <label class="chk" for="pick">Xem nhanh:</label>
     <select id="pick" aria-label="Chọn một chất để xem lý thuyết"></select>
     <label class="chk"><input type="checkbox" id="beep" checked> Kêu “bíp”</label>
@@ -175,10 +159,6 @@ fieldset:disabled{opacity:.5}
 </header>
 
 <div id="banner"></div>
-
-<section id="viewLop" hidden>
-  <div class="class" id="class"></div>
-</section>
 
 <section id="viewUsb" hidden>
   <div class="usbgrid">
@@ -219,12 +199,6 @@ fieldset:disabled{opacity:.5}
         </div>
         <div class="row"><button class="green" id="usbSave">Lưu vào ESP32 và kết nối</button></div>
         <div class="evt" id="usbWifiMsg" hidden></div>
-        <h2>Tên máy</h2>
-        <div class="row">
-          <input id="usbMay" maxlength="20" autocomplete="off" aria-label="Tên máy" placeholder="nhom1" style="max-width:180px">
-          <button class="ghost" id="usbMaySave">Lưu tên máy</button>
-        </div>
-        <p class="hint">Tên máy là tên nhóm hiện ở ô <b>Máy</b> và trang <b>Cả lớp</b>: chữ thường không dấu, số, - hoặc _ (tối đa 20 ký tự).</p>
       </fieldset>
     </section>
   </div>
@@ -235,7 +209,7 @@ fieldset:disabled{opacity:.5}
     <div class="lcd off" id="lcd" aria-live="polite"><div id="lcd0">  CHUA CO MAY</div><div id="lcd1"></div></div>
     <div class="lcdcap"><span id="lcdNote">Màn hình LCD của máy (hiện lại trên web)</span><span class="dots" id="dots"></span></div>
     <div class="status">
-      <div class="pill idle" id="stMay"><b>Máy</b>Chưa chọn máy</div>
+      <div class="pill idle" id="stMay"><b>Máy</b>Đang chờ dữ liệu…</div>
       <div class="pill idle" id="stNet"><b>Firebase</b>Đang kết nối…</div>
     </div>
     <div class="assembly" id="assembly" hidden></div>
@@ -245,10 +219,6 @@ fieldset:disabled{opacity:.5}
 
     <details class="sim" id="sim">
       <summary>Máy giả lập (dùng khi chưa có máy thật, hoặc để thử trang)</summary>
-      <div class="row">
-        <label class="chk" for="simId">Tên máy</label>
-        <input id="simId" value="giaolap" maxlength="20" aria-label="Tên máy giả lập" style="max-width:140px">
-      </div>
       <div class="row">
         <select id="simCard" aria-label="Chọn thẻ để quét"></select>
         <button id="simScan">Quét thẻ</button>
@@ -260,9 +230,9 @@ fieldset:disabled{opacity:.5}
       <div class="row">
         <button class="ghost" id="simDone">Thẻ XONG</button>
         <button class="ghost" id="simClear">Thẻ XÓA</button>
-        <button class="ghost" id="simWipe" title="Xóa nhật ký của máy đang xem">Xóa nhật ký máy đang xem</button>
+        <button class="ghost" id="simWipe" title="Xóa các lần quét đã lưu">Xóa nhật ký</button>
       </div>
-      <small>Máy giả lập suy luận theo đúng quy tắc của chương trình trên ESP32-CAM và ghi lên Firebase giống hệt máy thật, nên mọi trang đang mở đều thấy.</small>
+      <small>Máy giả lập suy luận theo đúng quy tắc của chương trình trên máy thật và ghi lên Firebase giống hệt máy thật, nên mọi trang đang mở đều thấy. Khi máy thật đang chạy, kết quả giả lập sẽ ghi đè lên màn hình của máy thật.</small>
     </details>
   </section>
 
@@ -274,11 +244,11 @@ fieldset:disabled{opacity:.5}
 <section class="panel help">
   <b>Cách dùng</b>
   <ol>
-    <li>Bật máy (bản ESP32-CAM, hoặc bản Arduino Uno + GM65 + ESP32 cầu nối). Màn LCD hiện <b>Da noi Internet</b> là máy đã lên mạng.</li>
-    <li>Mở trang này trên máy chiếu, máy tính hay điện thoại (cần Internet). Chọn tên máy của nhóm ở ô <b>Máy</b>.</li>
+    <li>Bật máy (Arduino Uno + GM65 + ESP32 cầu nối). Màn LCD hiện <b>Da noi Internet</b> là máy đã lên mạng.</li>
+    <li>Lần đầu (hoặc khi đổi WiFi): cắm cáp USB vào ESP32, mở tab <b>Cài đặt mạch (USB)</b> trên Chrome/Edge máy tính, dò WiFi và nhập mật khẩu.</li>
+    <li>Mở trang này trên máy chiếu, máy tính hay điện thoại (cần Internet).</li>
     <li>Đưa thẻ QR trước đầu đọc, giữ yên khoảng 1 giây. Máy tự đọc, tự kết luận và tự gửi lên trang; trang cập nhật trong khoảng 1–2 giây. Đèn trên máy: xanh dương = chưa quét, vàng = đã quét, xanh lá = quét xong.</li>
     <li>Thẻ nguyên tử: quét lần lượt (đưa thẻ ra khỏi khung giữa hai thẻ giống nhau), rồi quét thẻ <b>XONG</b>.</li>
-    <li>Giáo viên bấm <b>Cả lớp</b> để xem kết quả mới nhất của mọi nhóm; bấm vào một ô để xem chi tiết nhóm đó.</li>
   </ol>
   <div class="note">Máy giải mã QR và kết luận theo quy tắc cố định, <b>không phải AI</b>. Máy chỉ gửi nội dung thẻ và kết quả lên Firebase, <b>không gửi hình ảnh camera</b>.</div>
 </section>

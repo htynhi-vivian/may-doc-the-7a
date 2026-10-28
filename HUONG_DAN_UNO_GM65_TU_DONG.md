@@ -116,12 +116,10 @@ Cách này chỉ cần làm một lần; GM65 nhớ cài đặt.
 ## 7. Nạp chương trình cho ESP32
 
 1. Thêm bo ESP32 vào Arduino IDE: **File > Preferences > Additional boards manager URLs**, dán `https://espressif.github.io/arduino-esp32/package_esp32_index.json`; vào **Boards Manager**, cài **esp32** (Espressif, đã thử bản 3.3.12).
-2. Mở `cau_noi_internet/cau_noi_internet.ino`, sửa **`cau_hinh.h`**:
-   - `WIFI_TEN`, `WIFI_MAT_KHAU`: WiFi **2,4 GHz**, không phải loại đăng nhập qua trang web;
-   - `FIREBASE_API_KEY`, `FIREBASE_DB_URL`: lấy trong Firebase console;
-   - `MAY_ID`: mỗi nhóm một tên, ví dụ `nhom1`, `nhom2`.
+2. Mở `cau_noi_internet/cau_noi_internet.ino`. **Không cần sửa `cau_hinh.h`**: Firebase đã điền sẵn, tên máy cố định `may7a`.
 3. Chọn bo **NodeMCU-32S**, cắm cáp micro USB, bấm **Upload**. Báo `Failed to connect`: giữ nút **BOOT** khi IDE hiện `Connecting...`.
-4. Serial Monitor (115200 baud) báo `[WiFi] Da ket noi`, rồi `[Firebase] Da dang nhap an danh`. Đèn xanh trên ESP32 sáng đứng = đã nối; nháy = đang nối. LCD của Uno hiện **Da noi Internet**.
+4. **Cài WiFi từ trang web** (chỉ cần làm lần đầu hoặc khi đổi WiFi): đóng Arduino IDE, giữ cáp USB cắm vào ESP32, mở https://may-doc-the-7a.web.app bằng **Chrome hoặc Edge trên máy tính**, chọn tab **Cài đặt mạch (USB)** › **Kiểm tra mạch (USB)** › chọn cổng › **Dò WiFi** › chọn mạng, nhập mật khẩu › **Lưu vào ESP32 và kết nối**. Chỉ dùng WiFi **2,4 GHz**, không phải loại đăng nhập qua trang web. ESP32 nhớ WiFi cả khi mất điện.
+5. Serial Monitor (115200 baud) báo `[WiFi] Da ket noi`, rồi `[Firebase] Da dang nhap an danh`. Đèn xanh trên ESP32 sáng đứng = đã nối; nháy = đang nối. LCD của Uno hiện **Da noi Internet**.
 
 ## 8. Firebase và trang web
 

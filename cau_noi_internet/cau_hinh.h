@@ -14,9 +14,8 @@
 // Chép nguyên văn địa chỉ Realtime Database, KHÔNG có dấu / ở cuối.
 #define FIREBASE_DB_URL   "https://may-doc-the-7a-default-rtdb.asia-southeast1.firebasedatabase.app"
 
-// ---- 3. Tên máy: mỗi nhóm một tên khác nhau (đổi được ở trang web, mục "Cài đặt mạch (USB)") ----
-// Chỉ dùng chữ thường không dấu, số, dấu - hoặc _ (tối đa 20 ký tự). Ví dụ: nhom1, nhom2
-#define MAY_ID            "nhom1"
+// ---- 3. Tên máy trên Firebase: giữ nguyên (trang web đọc đúng tên này) ----
+#define MAY_ID            "may7a"
 
 // ---- 4. Chân nối với Arduino Uno (qua mạch chuyển mức 3,3 V <-> 5 V) ----
 #define CHAN_RX_TU_UNO    16     // GPIO16 (RX2)  <- Uno D1 (TX)   kết quả từ Uno

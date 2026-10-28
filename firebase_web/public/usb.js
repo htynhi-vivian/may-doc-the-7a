@@ -4,7 +4,6 @@
  *   #INFO                -> @{"loai":"info","mach":"esp32"|"uno",...}
  *   #QUET                -> @{"loai":"wifi","ds":[{ten,rssi,khoa}]}      (chỉ ESP32)
  *   #WIFI<TAB>ten<TAB>mk -> @{"loai":"da_luu"} | @{"loai":"loi","loi":...}
- *   #MAY<TAB>ten_may     -> như trên
  * ESP32 chạy ở 115200 baud, Arduino Uno ở 9600 baud: trang thử lần lượt để nhận ra mạch.
  * ============================================================ */
 (() => {
@@ -12,7 +11,6 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const ngu = (ms) => new Promise(r => setTimeout(r, ms));
-  const ID_OK = /^[a-z0-9_-]{1,20}$/;
   const LOG_MAX = 200;
 
   if (!("serial" in navigator)) {
@@ -115,9 +113,8 @@
       const [cls, chu] = WIFI_CHU[o.wifi] || ["idle", esc(o.wifi)];
       const net = o.wifi === "da_noi" ? `${chu}, ${FB_CHU[o.firebase] || esc(o.firebase)}` : chu;
       setPill($("usbNet"), o.wifi === "da_noi" && o.firebase !== "san_sang" ? (o.firebase === "loi" ? "err" : "wait") : cls, "Internet", net);
-      kv.push(["Tên máy", o.may], ["WiFi", o.wifi_ten || "(chưa cài)"]);
+      kv.push(["WiFi", o.wifi_ten || "(chưa cài)"]);
       if (o.wifi === "da_noi") kv.push(["Địa chỉ IP", o.ip], ["Sóng WiFi", `${o.rssi} dBm (${moTaSong(o.rssi)})`]);
-      if (document.activeElement !== $("usbMay") && !$("usbMay").value) $("usbMay").value = o.may || "";
       if (!$("usbSsid").value && o.wifi_ten) $("usbSsid").value = o.wifi_ten;
     } else {
       setPill($("usbBoard"), "ok", "Mạch", `Arduino Uno (máy đọc thẻ) · ${esc(o.phien_ban)}`);
@@ -157,7 +154,7 @@
   function chanDoan() {
     const doc = (toc) => (dongTam[toc] || []).filter(d => /^[\x20-\x7e\t]{4,}$/.test(d));
     if (doc(115200).some(d => /\[WiFi\]|\[Firebase\]|\[Uno\]|Cau noi/.test(d)))
-      return "Mạch là <b>ESP32</b> nhưng đang chạy chương trình cũ. Hãy nạp bản mới trong thư mục <code>cau_noi_internet</code> (hoặc <code>nap_san_nhom1</code>, <code>nap_san_nhom2</code>) rồi thử lại.";
+      return "Mạch là <b>ESP32</b> nhưng đang chạy chương trình cũ. Hãy nạp bản mới trong thư mục <code>cau_noi_internet</code> rồi thử lại.";
     if (doc(9600).some(d => /^(KQ|LG|LOI|CHO)\b/.test(d)))
       return "Mạch là <b>Arduino Uno</b> nhưng đang chạy chương trình cũ. Hãy nạp bản mới trong thư mục <code>may_doc_the_internet</code> rồi thử lại.";
     return "Không nhận được trả lời. Kiểm tra: đã chọn đúng cổng chưa; Arduino IDE (Serial Monitor) có đang mở cổng này không; mạch đã nạp chương trình bản 1.2 chưa; cáp USB có truyền dữ liệu (không phải cáp chỉ sạc) không.";
@@ -260,7 +257,7 @@
         hienThongTin(o);
         const lau = Date.now() - batDau > 6000;     // cho ESP32 thử vài giây rồi mới tin lý do lỗi
         if (o.wifi === "da_noi" && o.firebase === "san_sang")
-          return thongBao("ok", `✓ ESP32 đã nối WiFi <b>${esc(ten)}</b> (IP ${esc(o.ip)}) và đã lên Firebase. Máy <b>${esc(o.may)}</b> sẽ hiện ở trang <b>Cả lớp</b>.`);
+          return thongBao("ok", `✓ ESP32 đã nối WiFi <b>${esc(ten)}</b> (IP ${esc(o.ip)}) và đã lên Firebase. Kết quả quét thẻ sẽ hiện ở tab <b>Kết quả quét</b>.`);
         if (o.wifi === "da_noi") thongBao("wait", `Đã nối WiFi (IP ${esc(o.ip)}). Đang đăng nhập Firebase…`);
         if (lau && o.wifi === "sai_mat_khau") return thongBao("loi", "Sai mật khẩu WiFi. Gõ lại mật khẩu rồi bấm Lưu.");
         if (lau && o.wifi === "khong_thay_mang") return thongBao("loi", "ESP32 không thấy mạng này. Kiểm tra tên WiFi (phân biệt chữ hoa/thường), WiFi có phải 2,4 GHz không, và để máy gần bộ phát hơn.");
@@ -272,23 +269,11 @@
     finally { dangLuu = false; $("usbSave").disabled = false; }
   }
 
-  async function luuTenMay() {
-    const id = $("usbMay").value.trim();
-    if (!ID_OK.test(id)) return thongBao("loi", "Tên máy chỉ gồm chữ thường không dấu, số, - hoặc _ (tối đa 20 ký tự).");
-    try {
-      const r = await hoi(`#MAY\t${id}`, "da_luu", 3000);
-      if (!r || r.loai === "loi") return thongBao("loi", "Không lưu được tên máy" + (r ? ": " + esc(r.loi) : "."));
-      thongBao("ok", `✓ Đã đổi tên máy thành <b>${esc(id)}</b>.`);
-      gui("#INFO").catch(() => {});
-    } catch (e) { thongBao("loi", esc(e.message)); }
-  }
-
   $("usbConnect").onclick = ketNoi;
   $("usbClose").onclick = () => ngat();
   $("usbInfo").onclick = () => gui("#INFO").catch(e => ngat("Mất kết nối: " + e.message));
   $("usbScan").onclick = quetWifi;
   $("usbSave").onclick = luuWifi;
-  $("usbMaySave").onclick = luuTenMay;
   $("usbSsid").addEventListener("input", veDsWifi);
   $("usbShow").onclick = () => {
     const hien = $("usbPass").type === "password";

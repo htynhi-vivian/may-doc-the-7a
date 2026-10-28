@@ -10,7 +10,7 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const TS = { ".sv": "timestamp" };
-  const ID_OK = /^[a-z0-9_-]{1,20}$/;
+  const MAY = "may7a";                     // chỉ có một máy (trùng MAY_ID trong cau_hinh.h của ESP32)
   const ONLINE_MS = 75000;                 // quá 75 s không nhận "trang_thai" thì coi là mất kết nối
   const params = new URLSearchParams(location.search);
 
@@ -71,15 +71,13 @@
   function showBanner(cls, html) { $("banner").innerHTML += `<div class="banner ${cls}">${html}</div>`; }
   if (B.kind === "thu") {
     showBanner("demo", "<b>Chế độ thử</b> — chưa điền cấu hình Firebase nên trang không nhận được máy thật. Mở mục <b>Máy giả lập</b> bên dưới để thử: chọn thẻ, bấm <b>Quét thẻ</b>. Mở thêm một thẻ (tab) trình duyệt khác cùng địa chỉ này sẽ thấy dữ liệu đồng bộ.");
-    $("simId").value = "nhom1";
   }
 
   // ================= TRẠNG THÁI TRANG =================
   let allMay = {};                // /may
-  let chon = params.get("may") || "";
-  let lastEvtJSON = "", firstEvt = true, unLog = null;
+  const chon = MAY;
+  let lastEvtJSON = "", firstEvt = true;
   let netOK = null, audio = null, lcdTimer = null;
-  const seenAt = {};              // để nhấp nháy ô máy vừa có kết quả mới
 
   // ================= BẢNG LÝ THUYẾT (giống trang camera) =================
   const LK = { ion: ["ion", "Liên kết ion"], cht: ["cht", "Liên kết cộng hóa trị"], kl: ["kl", "Kim loại"], kh: ["kh", "Khí hiếm"], pk: ["pk", "Phi kim"] };
@@ -219,7 +217,6 @@
   }
   function renderStatus() {
     const m = allMay[chon];
-    if (!chon) { setPill($("stMay"), "idle", "Máy", "Chưa chọn máy"); return; }
     const st = m && m.trang_thai;
     if (isOnline(st)) setPill($("stMay"), "ok", "Máy " + esc(chon), `Trực tuyến · WiFi ${st.rssi ?? "?"} dBm`);
     else if (st && st.luc) setPill($("stMay"), "err", "Máy " + esc(chon), `Mất kết nối · lần cuối ${fmtTime(st.luc)}`);
@@ -227,7 +224,7 @@
   }
   function renderEvent(e, isNew) {
     $("evt").hidden = true; $("assembly").hidden = true;
-    if (!e) { lcd("  QUET THE QR", chon ? "Cho may gui..." : "", { off: !chon }); return; }
+    if (!e) { lcd("  QUET THE QR", "Cho may gui..."); return; }
     if (e.loai === "ket_qua") {
       lcdKetQua(e);
       showSubstance(e.cong_thuc, e.ten, e.ten === "(tu lap ghep)", e);
@@ -254,53 +251,17 @@
       `<li><time>${fmtTime(e.luc)}</time><span class="f">${subHTML(esc(e.cong_thuc))}</span><span>${esc(e.ten)}</span><span class="k">${esc(e.ket_luan)}</span></li>`).join("")
       : `<li class="empty">Chưa có lần quét nào.</li>`;
   }
-  function selectMay(id, fromUser) {
-    if (id === chon && !fromUser) return;
-    chon = id; lastEvtJSON = ""; firstEvt = true;
-    if (unLog) { unLog(); unLog = null; }
-    renderLog(null);
-    if (id) unLog = B.watchLast("/nhat_ky/" + id, 30, renderLog, onDbErr);
-    const u = new URL(location.href); id ? u.searchParams.set("may", id) : u.searchParams.delete("may"); history.replaceState(null, "", u);
-    $("may").value = id;
-    onMay();
-  }
-
-  // ================= CẢ LỚP =================
-  function renderClass() {
-    const ids = Object.keys(allMay).sort();
-    if (!ids.length) { $("class").innerHTML = `<div class="emptyclass">Chưa có máy nào gửi dữ liệu. Bật máy ESP32-CAM, hoặc dùng <b>Máy giả lập</b> ở chế độ Một máy.</div>`; return; }
-    $("class").innerHTML = ids.map(id => {
-      const m = allMay[id] || {}, e = m.hien_tai || {}, on = isOnline(m.trang_thai);
-      let f = "–", k = "Chưa quét thẻ nào";
-      if (e.loai === "ket_qua") { f = subHTML(esc(e.cong_thuc)); k = `${esc(e.ket_luan)} · ${esc(e.ten)}`; }
-      else if (e.loai === "lap_ghep") { f = subHTML(esc(e.cong_thuc)); k = `Đang lắp ghép · ${e.so_the} thẻ`; }
-      else if (e.loai === "loi") { f = "!"; k = `Lỗi: ${esc(e.dong1)}`; }
-      const moi = e.luc && seenAt[id] !== e.luc && seenAt[id] !== undefined;
-      seenAt[id] = e.luc;
-      return `<button class="mcard${moi ? " moi" : ""}" data-id="${esc(id)}"><div class="top"><span class="id">${esc(id)}</span><span class="on ${on ? "y" : "n"}">${on ? "trực tuyến" : "ngoại tuyến"}</span></div>
-        <div class="f">${f}</div><div class="k">${k}</div><div class="k">${e.luc ? fmtTime(e.luc) : ""}</div></button>`;
-    }).join("");
-  }
-  $("class").addEventListener("click", (ev) => { const b = ev.target.closest(".mcard"); if (b) { selectMay(b.dataset.id, true); setView("mot"); } });
   function setView(v) {
-    $("tabMot").setAttribute("aria-pressed", v === "mot"); $("tabLop").setAttribute("aria-pressed", v === "lop"); $("tabUsb").setAttribute("aria-pressed", v === "usb");
-    $("viewMot").hidden = v !== "mot"; $("viewLop").hidden = v !== "lop"; $("viewUsb").hidden = v !== "usb";
+    $("tabMot").setAttribute("aria-pressed", v === "mot"); $("tabUsb").setAttribute("aria-pressed", v === "usb");
+    $("viewMot").hidden = v !== "mot"; $("viewUsb").hidden = v !== "usb";
     const u = new URL(location.href); v !== "mot" ? u.searchParams.set("xem", v) : u.searchParams.delete("xem"); history.replaceState(null, "", u);
   }
   $("tabMot").onclick = () => setView("mot");
-  $("tabLop").onclick = () => setView("lop");
   $("tabUsb").onclick = () => setView("usb");
 
   // ================= NHẬN DỮ LIỆU =================
   function onMay() {
-    const ids = Object.keys(allMay).sort();
-    if (!chon && ids.length) { selectMay(ids[0]); return; }
-    const sel = $("may");
-    const opts = (ids.includes(chon) || !chon ? ids : [chon, ...ids]);
-    const html = opts.length ? opts.map(id => `<option value="${esc(id)}">${esc(id)}${isOnline(allMay[id] && allMay[id].trang_thai) ? " ●" : ""}</option>`).join("") : `<option value="">(chưa có máy nào)</option>`;
-    if (sel.innerHTML !== html) sel.innerHTML = html;
-    sel.value = chon;
-    renderStatus(); renderClass();
+    renderStatus();
     const e = allMay[chon] && allMay[chon].hien_tai || null;
     const j = JSON.stringify(e);
     if (j !== lastEvtJSON) { renderEvent(e, !firstEvt); lastEvtJSON = j; }
@@ -310,7 +271,6 @@
     netOK = false;
     setPill($("stNet"), "err", "Firebase", /permission/i.test(e.message) ? "Bị từ chối: chưa đăng quy tắc (rules)" : "Lỗi: " + esc(e.message));
   }
-  $("may").onchange = () => selectMay($("may").value, true);
   B.watch("/may", (v) => {
     allMay = v || {};
     if (netOK !== true) { netOK = true; setPill($("stNet"), "ok", B.kind === "thu" ? "Chế độ thử" : "Firebase", B.kind === "thu" ? "Dữ liệu chỉ trong trình duyệt này" : "Đã kết nối, nhận dữ liệu tức thì"); }
@@ -320,15 +280,15 @@
     if (c === false && netOK) setPill($("stNet"), "wait", "Firebase", "Mất mạng, đang kết nối lại…");
     else if (c === true && netOK) setPill($("stNet"), "ok", "Firebase", "Đã kết nối, nhận dữ liệu tức thì");
   });
-  setInterval(() => { renderStatus(); renderClass(); }, 15000);   // cập nhật trực tuyến / ngoại tuyến theo thời gian
-  if (chon) selectMay(chon, true); else lcd("  CHUA CO MAY", "", { off: true });
-  if (params.get("xem") === "lop" || params.get("xem") === "usb") setView(params.get("xem"));
+  B.watchLast("/nhat_ky/" + MAY, 30, renderLog, onDbErr);
+  setInterval(renderStatus, 15000);   // cập nhật trực tuyến / ngoại tuyến theo thời gian
+  onMay();
+  if (params.get("xem") === "usb") setView("usb");
 
   // ================= MÁY GIẢ LẬP (cùng quy tắc với firmware ESP32-CAM) =================
   const Sim = (() => {
-    let dem = {}, order = [], soThe = 0, lapGhep = false, lan = 0, hb = null, hbId = "";
+    let dem = {}, order = [], soThe = 0, lapGhep = false, lan = 0, hb = null;
     const ascii = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
-    const id = () => { const v = $("simId").value.trim().toLowerCase(); if (!ID_OK.test(v)) throw new Error("Tên máy chỉ gồm chữ thường không dấu, số, - hoặc _ (tối đa 20 ký tự)"); return v; };
     const formulaOf = () => order.map(e => e + (dem[e] > 1 ? dem[e] : "")).join("");
     const reset = () => { dem = {}; order = []; soThe = 0; lapGhep = false; };
     function ketQua(ma, congThuc, ten, cnt) {
@@ -341,13 +301,14 @@
       const klpt = Math.round(els.reduce((a, e) => a + cnt[e] * ELEM[e].m, 0) * 10) / 10;
       return { loai: "ket_qua", ma, cong_thuc: congThuc, ten, nguyen_tu: nAt, nguyen_to: nEl, hat, ket_luan: ket, man4, phan_loai: lk, klpt, dem: ++lan, luc: TS };
     }
-    async function gui(m, e) {
-      await B.set(`/may/${m}/hien_tai`, e);
-      if (e.loai === "ket_qua") await B.push(`/nhat_ky/${m}`, e);
+    async function gui(e) {
+      await B.set(`/may/${MAY}/hien_tai`, e);
+      if (e.loai === "ket_qua") await B.push(`/nhat_ky/${MAY}`, e);
     }
-    async function heartbeat(m) {
-      if (hbId !== m) { clearInterval(hb); hbId = m; hb = setInterval(() => B.set(`/may/${m}/trang_thai`, { online: true, ip: "giả lập", rssi: -50, phien_ban: "web-gia-lap", luc: TS }).catch(() => {}), 30000); }
-      await B.set(`/may/${m}/trang_thai`, { online: true, ip: "giả lập", rssi: -50, phien_ban: "web-gia-lap", luc: TS });
+    const baoTrucTuyen = () => B.set(`/may/${MAY}/trang_thai`, { online: true, ip: "giả lập", rssi: -50, phien_ban: "web-gia-lap", luc: TS });
+    async function heartbeat() {
+      if (!hb) hb = setInterval(() => baoTrucTuyen().catch(() => {}), 30000);
+      await baoTrucTuyen();
     }
     const loi = (ma, d1, d2) => ({ loai: "loi", dong1: d1.slice(0, 16), dong2: d2.slice(0, 16), ma, luc: TS });
     function themNT(ma, sym) {
@@ -384,11 +345,8 @@
       return [loi(s, "Ma QR la", "Ngoai bo the")];
     }
     async function quet(code) {
-      let m;
-      try { m = id(); } catch (e) { alertBox(e.message); return; }
-      await heartbeat(m);
-      for (const e of xuLy(code)) await gui(m, e);
-      if (chon !== m) selectMay(m, true);
+      await heartbeat();
+      for (const e of xuLy(code)) await gui(e);
     }
     const cardCode = (f) => `CT:${f}|${ascii(LIB[f].ten).slice(0, 16)}`;
     return { quet, xuLy, cardCode, ketQua, reset };
@@ -404,7 +362,7 @@
   $("simCode").addEventListener("keydown", (e) => { if (e.key === "Enter") $("simSend").click(); });
   $("simDone").onclick = () => run("LENH:XONG");
   $("simClear").onclick = () => run("LENH:XOA");
-  $("simWipe").onclick = () => { if (chon) B.remove("/nhat_ky/" + chon).catch(e => alertBox("Không xóa được: " + e.message)); };
+  $("simWipe").onclick = () => { B.remove("/nhat_ky/" + MAY).catch(e => alertBox("Không xóa được: " + e.message)); };
 
-  window.__app = { B, Sim, selectMay, setView, showSubstance, showAtom };
+  window.__app = { B, Sim, setView, showSubstance, showAtom };
 })();
