@@ -70,7 +70,7 @@
   catch (e) { B = backendThu(); showBanner("err", "Không khởi động được Firebase (" + esc(e.message) + "). Kiểm tra tệp <b>cau_hinh_firebase.js</b>. Trang tạm chạy chế độ thử."); }
   function showBanner(cls, html) { $("banner").innerHTML += `<div class="banner ${cls}">${html}</div>`; }
   if (B.kind === "thu") {
-    showBanner("demo", "<b>Chế độ thử</b> — chưa điền cấu hình Firebase nên trang không nhận được máy thật. Mở mục <b>Máy giả lập</b> bên dưới để thử: chọn thẻ, bấm <b>Quét thẻ</b>. Mở thêm một thẻ (tab) trình duyệt khác cùng địa chỉ này sẽ thấy dữ liệu đồng bộ.");
+    showBanner("demo", "<b>Chế độ thử</b> — chưa điền cấu hình Firebase nên trang không nhận được máy thật. Mở tab <b>Dành cho thầy cô</b>, mục <b>Máy giả lập</b> để thử: chọn thẻ, bấm <b>Quét thẻ</b>. Mở thêm một thẻ (tab) trình duyệt khác cùng địa chỉ này sẽ thấy dữ liệu đồng bộ.");
   }
 
   // ================= TRẠNG THÁI TRANG =================
@@ -89,6 +89,17 @@
     const tot = order.reduce((a, e) => a + cnt[e] * ELEM[e].m, 0);
     return { txt: parts.join(" + ") + " = " + (Math.round(tot * 10) / 10).toString().replace(".", ",") + " amu", tot };
   }
+  // Nút phóng to bảng lý thuyết (chiếu cho cả lớp)
+  const FS = `<button type="button" class="ghost fs" data-fs>⛶ Phóng to</button>`;
+  $("theory").addEventListener("click", (ev) => {
+    if (!ev.target.closest("[data-fs]")) return;
+    const T = $("theory");
+    if (document.fullscreenElement) document.exitFullscreen(); else if (T.requestFullscreen) T.requestFullscreen().catch(() => {});
+  });
+  document.addEventListener("fullscreenchange", () => {
+    const b = $("theory").querySelector("[data-fs]");
+    if (b) b.textContent = document.fullscreenElement ? "✕ Thu nhỏ" : "⛶ Phóng to";
+  });
   // dev: bản ghi ket_qua máy gửi (nếu có) — để hiện đúng điều MÁY đã kết luận
   function showSubstance(formula, name, fromAssembly, dev) {
     const p = parseFormula(formula);
@@ -116,7 +127,7 @@
     const sai = L && mayLk !== real && !(dc && mayLk === "cht" && real === "cht");
     const lcdTxt = dev ? `<br><small>Trên LCD: ${esc(dev.ket_luan)} · ${esc(dev.man4)} · ${esc(String(dev.klpt))} amu</small>` : "";
     const composition = order.map(e => `${e}: ${cnt[e]} nguyên tử`).join(" · ");
-    T.innerHTML = `
+    T.innerHTML = FS + `
       <div class="th-head"><div class="th-f">${subHTML(shownF)}</div><div class="th-name">${L ? esc(L.ten) : (name ? esc(name) : "Chưa có trong thư viện")}</div></div>
       <div class="chips">${chips.join("")}</div>
       <div class="stats">
@@ -127,17 +138,17 @@
       <div class="th-body">
         <div>
           ${fig.svg ? `<div class="figbox">${fig.svg}<div class="cap">${fig.cap}</div>${fig.extra ? `<div class="extra">${fig.extra}</div>` : ""}</div>` : `<div class="figbox"><div class="cap">Chưa có hình vẽ cho chất này.</div></div>`}
-          <div class="mass"><b>Thành phần:</b> ${composition}<br><b>Khối lượng:</b> ${ms.txt}</div>
+          <div class="mass"><b>🧮 Thành phần:</b> ${composition}<br><b>Khối lượng:</b> ${ms.txt}</div>
         </div>
         <div>
           ${L ? `
-          <div class="sec"><h3>Đặc điểm</h3><p>${esc(L.mota)}</p></div>
-          <div class="sec"><h3>Tính chất</h3><p>${esc(L.tc)}</p></div>
-          <div class="sec"><h3>Ứng dụng, đời sống</h3><p>${esc(L.ud)}</p></div>
-          ${L.at ? `<div class="box at"><b class="t">An toàn</b>${esc(L.at)}</div>` : ""}
-          ${L.biet ? `<div class="box biet"><b class="t">Em có biết</b>${esc(L.biet)}</div>` : ""}`
-          : `<div class="box biet"><b class="t">Chất này chưa có trong thư viện</b>${fromAssembly ? "Có thể các thẻ em ghép lại không tạo thành một chất có thật (ví dụ HO, H<sub>3</sub>O). Máy chỉ đếm theo quy tắc nên vẫn kết luận được, nhưng không biết chất đó có tồn tại hay không." : "Trang vẫn đếm được số nguyên tử, số nguyên tố và khối lượng theo công thức."}</div>`}
-          <div class="box may ${sai ? "sai" : ""}"><b class="t">Máy đọc thẻ nói</b>${mayTxt}${sai ? `<br><b>Máy sai ở đây!</b> Máy dùng quy tắc gần đúng “có kim loại + phi kim → ion”. Chất này không có kim loại nhưng thực tế là <b>hợp chất ion</b> (có ion NH<sub>4</sub><sup>+</sup>).` : ""}${lcdTxt}</div>
+          <div class="sec"><h3>🔎 Đặc điểm</h3><p>${esc(L.mota)}</p></div>
+          <div class="sec"><h3>⚗️ Tính chất</h3><p>${esc(L.tc)}</p></div>
+          <div class="sec"><h3>🏠 Ứng dụng, đời sống</h3><p>${esc(L.ud)}</p></div>
+          ${L.at ? `<div class="box at"><b class="t">⚠️ An toàn</b>${esc(L.at)}</div>` : ""}
+          ${L.biet ? `<div class="box biet"><b class="t">💡 Em có biết?</b>${esc(L.biet)}</div>` : ""}`
+          : `<div class="box biet"><b class="t">🤔 Chất này chưa có trong thư viện</b>${fromAssembly ? "Có thể các thẻ em ghép lại không tạo thành một chất có thật (ví dụ HO, H<sub>3</sub>O). Máy chỉ đếm theo quy tắc nên vẫn kết luận được, nhưng không biết chất đó có tồn tại hay không." : "Trang vẫn đếm được số nguyên tử, số nguyên tố và khối lượng theo công thức."}</div>`}
+          <div class="box may ${sai ? "sai" : ""}"><b class="t">🤖 Máy đọc thẻ kết luận</b>${mayTxt}${sai ? `<br><b>Máy sai ở đây!</b> Máy dùng quy tắc gần đúng “có kim loại + phi kim → ion”. Chất này không có kim loại nhưng thực tế là <b>hợp chất ion</b> (có ion NH<sub>4</sub><sup>+</sup>).` : ""}${lcdTxt}</div>
         </div>
       </div>`;
     mountViewers(T);
@@ -147,7 +158,7 @@
     if (!E) return;
     const b = drawBohr(sym);
     const svg = typeof b === "string" ? b : b.svg, shells = typeof b === "string" ? null : b.shells;
-    T.innerHTML = `
+    T.innerHTML = FS + `
       <div class="th-head"><div class="th-f">${sym}</div><div class="th-name">Nguyên tử ${esc(E.ten)}</div></div>
       <div class="chips"><span class="chip ${E.loai}">${LK[E.loai][1]}</span><span class="chip tt">Thẻ nguyên tử · dùng để lắp ghép</span></div>
       <div class="stats">
@@ -158,9 +169,9 @@
       <div class="th-body">
         <div class="figbox">${svg}<div class="cap">${shells ? `Mô hình nguyên tử Rutherford – Bohr: hạt nhân ở giữa (+${E.z}), ${E.z} electron xếp thành ${shells.length} lớp: ${shells.join(", ")}. Chấm hồng là electron lớp ngoài cùng. Các lớp electron là các vòng tròn đồng tâm quanh hạt nhân (như SGK); kéo để xoay cả mô hình. Thực tế electron chuyển động rất nhanh quanh hạt nhân tạo thành đám mây electron.` : `Nguyên tử ${sym} có ${E.z} electron xếp trên nhiều lớp; ở lớp 7 chưa cần vẽ chi tiết. Hình là ô mạng tinh thể của kim loại ${sym}.`}</div></div>
         <div>
-          ${shells ? `<div class="sec"><h3>Lớp ngoài cùng</h3><p><b>${shells[shells.length - 1]} electron</b>${E.loai === "kh" ? " — đã bền vững, nên khí hiếm hầu như không liên kết." : E.loai === "kl" ? " — kim loại dễ nhường các electron này để thành ion dương." : " — phi kim có xu hướng nhận thêm hoặc góp chung electron để lớp ngoài cùng đủ 8 (với H là 2)."}</p></div>` : ""}
-          ${ATOM_NOTE[sym] ? `<div class="box biet"><b class="t">Ghi nhớ</b>${esc(ATOM_NOTE[sym])}</div>` : ""}
-          ${dangLap ? `<div class="box may"><b class="t">Đang lắp ghép</b>Quét tiếp các thẻ nguyên tử khác, rồi quét thẻ <b>XONG</b> để xem chất em vừa tạo.</div>` : ""}
+          ${shells ? `<div class="sec"><h3>⚛️ Lớp electron ngoài cùng</h3><p><b>${shells[shells.length - 1]} electron</b>${E.loai === "kh" ? " — đã bền vững, nên khí hiếm hầu như không liên kết." : E.loai === "kl" ? " — kim loại dễ nhường các electron này để thành ion dương." : " — phi kim có xu hướng nhận thêm hoặc góp chung electron để lớp ngoài cùng đủ 8 (với H là 2)."}</p></div>` : ""}
+          ${ATOM_NOTE[sym] ? `<div class="box biet"><b class="t">📌 Ghi nhớ</b>${esc(ATOM_NOTE[sym])}</div>` : ""}
+          ${dangLap ? `<div class="box may"><b class="t">🧩 Đang lắp ghép</b>Quét tiếp các thẻ nguyên tử khác, rồi quét thẻ <b>XONG</b> để xem chất em vừa tạo.</div>` : ""}
         </div>
       </div>`;
     mountViewers(T);
@@ -245,12 +256,23 @@
       lcd("  QUET THE QR", "Da noi Internet");
     }
   }
+  let logItems = [];
   function renderLog(v) {
-    const items = v ? Object.values(v).reverse() : [];
-    $("log").innerHTML = items.length ? items.map(e =>
-      `<li><time>${fmtTime(e.luc)}</time><span class="f">${subHTML(esc(e.cong_thuc))}</span><span>${esc(e.ten)}</span><span class="k">${esc(e.ket_luan)}</span></li>`).join("")
-      : `<li class="empty">Chưa có lần quét nào.</li>`;
+    logItems = v ? Object.values(v).reverse() : [];
+    $("log").innerHTML = logItems.length ? logItems.map((e, i) =>
+      `<li tabindex="0" role="button" data-i="${i}" title="Xem lại ${esc(e.cong_thuc)}"><span class="f">${subHTML(esc(e.cong_thuc))}</span><span class="t">${esc(e.ten === "(tu lap ghep)" ? "tự lắp ghép" : e.ten)}</span><time>${fmtTime(e.luc)}</time><span class="k">${esc(e.ket_luan)}</span></li>`).join("")
+      : `<li class="empty">Chưa có lần quét nào. Hãy quét thẻ đầu tiên! 🃏</li>`;
   }
+  // Bấm vào một lần quét cũ để xem lại bài của chất đó
+  function xemLai(ev) {
+    const li = ev.target.closest("li[data-i]");
+    if (!li || (ev.type === "keydown" && ev.key !== "Enter" && ev.key !== " ")) return;
+    ev.preventDefault();
+    const e = logItems[+li.dataset.i];
+    if (e) showSubstance(e.cong_thuc, e.ten, e.ten === "(tu lap ghep)", e);
+  }
+  $("log").addEventListener("click", xemLai);
+  $("log").addEventListener("keydown", xemLai);
   function setView(v) {
     $("tabMot").setAttribute("aria-pressed", v === "mot"); $("tabUsb").setAttribute("aria-pressed", v === "usb");
     $("viewMot").hidden = v !== "mot"; $("viewUsb").hidden = v !== "usb";

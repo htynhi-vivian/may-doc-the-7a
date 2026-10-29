@@ -257,7 +257,7 @@
         hienThongTin(o);
         const lau = Date.now() - batDau > 6000;     // cho ESP32 thử vài giây rồi mới tin lý do lỗi
         if (o.wifi === "da_noi" && o.firebase === "san_sang")
-          return thongBao("ok", `✓ ESP32 đã nối WiFi <b>${esc(ten)}</b> (IP ${esc(o.ip)}) và đã lên Firebase. Kết quả quét thẻ sẽ hiện ở tab <b>Kết quả quét</b>.`);
+          return thongBao("ok", `✓ ESP32 đã nối WiFi <b>${esc(ten)}</b> (IP ${esc(o.ip)}) và đã lên Firebase. Kết quả quét thẻ sẽ hiện ở tab <b>Khám phá</b>.`);
         if (o.wifi === "da_noi") thongBao("wait", `Đã nối WiFi (IP ${esc(o.ip)}). Đang đăng nhập Firebase…`);
         if (lau && o.wifi === "sai_mat_khau") return thongBao("loi", "Sai mật khẩu WiFi. Gõ lại mật khẩu rồi bấm Lưu.");
         if (lau && o.wifi === "khong_thay_mang") return thongBao("loi", "ESP32 không thấy mạng này. Kiểm tra tên WiFi (phân biệt chữ hoa/thường), WiFi có phải 2,4 GHz không, và để máy gần bộ phát hơn.");
