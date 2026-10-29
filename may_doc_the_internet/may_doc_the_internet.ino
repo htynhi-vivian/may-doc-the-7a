@@ -245,7 +245,6 @@ byte chiSoDuoi[8][8] = {
 };
 
 /* Lệnh cài đặt GM65 (giao thức nối tiếp của hãng; "AB CD" = bỏ qua kiểm tra CRC) */
-const uint8_t GM65_DOC_CD[]  PROGMEM = {0x7E, 0x00, 0x07, 0x01, 0x00, 0x00, 0x01, 0xAB, 0xCD}; // đọc ô cài đặt 0x0000
 const uint8_t GM65_LUU[]     PROGMEM = {0x7E, 0x00, 0x09, 0x01, 0x00, 0x00, 0x00, 0xDE, 0xC8}; // lưu cài đặt vào bộ nhớ
 
 /* ---------- Đèn LED RGB WS2812B (1 bóng) ----------
@@ -582,17 +581,26 @@ int docTraLoiGM65(unsigned long choMs) {
   return -1;
 }
 
-// Đặt GM65 sang QUÉT LIÊN TỤC (2 bit thấp của ô 0x0000 = 10), chỉ ghi khi cần, rồi lưu.
-void caiDatGM65() {
+// Đặt 2 bit thấp của một ô cài đặt GM65 thành `giaTri` (chỉ ghi khi khác). Trả về 1 nếu đã ghi.
+uint8_t datOGM65(uint8_t o, uint8_t giaTri) {
   while (mayQuet.available()) mayQuet.read();
-  guiGM65(GM65_DOC_CD, sizeof(GM65_DOC_CD));
+  uint8_t lenhDoc[9] = {0x7E, 0x00, 0x07, 0x01, 0x00, o, 0x01, 0xAB, 0xCD};
+  for (uint8_t i = 0; i < 9; i++) mayQuet.write(lenhDoc[i]);
   int v = docTraLoiGM65(500);
-  if (v < 0) return;                    // không đọc được: giữ nguyên (xem hướng dẫn: dùng mã cấu hình)
-  if ((v & 0x03) == 0x02) return;       // đã ở chế độ quét liên tục
-  uint8_t moi = (uint8_t)((v & ~0x03) | 0x02);
-  uint8_t lenhGhi[9] = {0x7E, 0x00, 0x08, 0x01, 0x00, 0x00, moi, 0xAB, 0xCD};
+  if (v < 0) return 0;                  // không đọc được: giữ nguyên (xem hướng dẫn: dùng mã cấu hình)
+  if ((v & 0x03) == giaTri) return 0;   // đã đúng
+  uint8_t moi = (uint8_t)((v & ~0x03) | giaTri);
+  uint8_t lenhGhi[9] = {0x7E, 0x00, 0x08, 0x01, 0x00, o, moi, 0xAB, 0xCD};
   for (uint8_t i = 0; i < 9; i++) mayQuet.write(lenhGhi[i]);
-  if (docTraLoiGM65(500) < 0) return;
+  return docTraLoiGM65(500) < 0 ? 0 : 1;
+}
+
+// Đặt GM65 sang QUÉT LIÊN TỤC (ô 0x0000 = 10) và XUẤT MÃ QUA CỔNG NỐI TIẾP (ô 0x000D = 00, không phải
+// bàn phím USB — ở chế độ USB, GM65 kêu bíp nhưng Uno không nhận được gì), rồi lưu.
+void caiDatGM65() {
+  uint8_t daGhi = datOGM65(0x00, 0x02);
+  daGhi |= datOGM65(0x0D, 0x00);
+  if (!daGhi) return;
   guiGM65(GM65_LUU, sizeof(GM65_LUU));
   docTraLoiGM65(500);
 }
