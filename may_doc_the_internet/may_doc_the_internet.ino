@@ -3,7 +3,7 @@
  * KHTN 7 · Bài 5: Phân tử – Đơn chất – Hợp chất · Bài 6: Giới thiệu về liên kết hóa học
  * Tác giả: Trí Huệ
  * ------------------------------------------------------------
- * Arduino Uno là "bộ não". Đầu đọc GM65 TỰ QUÉT liên tục: đưa thẻ vào là đọc,
+ * Arduino Uno là "bộ não". Đầu đọc GM65 TỰ QUÉT (chế độ cảm ứng): đưa thẻ vào là đọc,
  * không cần bấm nút. Mỗi thẻ đọc được, Uno suy luận, hiện 5 màn trên LCD
  * (giống hệt chương trình may_doc_the_phan_tu) và TỰ GỬI kết quả sang mạch ESP32;
  * ESP32 đẩy lên Firebase, trang web của lớp hiện ngay bài lý thuyết.
@@ -44,7 +44,8 @@
 #include <stdint.h>
 
 /* ================= CẤU HÌNH ================= */
-#define CAI_DAT_GM65  1   // 1 = khi khởi động, tự đặt GM65 sang chế độ QUÉT LIÊN TỤC (0 = giữ cài đặt sẵn của GM65)
+#define CAI_DAT_GM65  1   // 1 = khi khởi động, tự đặt chế độ quét cho GM65 (0 = giữ cài đặt sẵn của GM65)
+#define CHE_DO_GM65   3   // 3 = CẢM ỨNG (đèn chiếu chỉ bật khi có thẻ đưa vào) · 2 = QUÉT LIÊN TỤC (đèn chiếu luôn sáng)
 #define CHAN_MANG     7   // chân báo trạng thái Internet từ ESP32 (THẤP = đã nối)
 #define CHAN_LED_RGB  10  // chân DI của mạch LED RGB WS2812B
 #define DO_SANG_LED   60  // độ sáng đèn 0..255 (WS2812B rất chói, 40–80 là vừa)
@@ -565,10 +566,10 @@ uint8_t datOGM65(uint8_t o, uint8_t giaTri) {
   return docTraLoiGM65(500) < 0 ? 0 : 1;
 }
 
-// Đặt GM65 sang QUÉT LIÊN TỤC (ô 0x0000 = 10) và XUẤT MÃ QUA CỔNG NỐI TIẾP (ô 0x000D = 00, không phải
+// Đặt chế độ quét của GM65 (ô 0x0000: 10 = liên tục, 11 = cảm ứng) và XUẤT MÃ QUA CỔNG NỐI TIẾP (ô 0x000D = 00, không phải
 // bàn phím USB — ở chế độ USB, GM65 kêu bíp nhưng Uno không nhận được gì), rồi lưu.
 void caiDatGM65() {
-  uint8_t daGhi = datOGM65(0x00, 0x02);
+  uint8_t daGhi = datOGM65(0x00, CHE_DO_GM65);
   daGhi |= datOGM65(0x0D, 0x00);
   if (!daGhi) return;
   guiGM65(GM65_LUU, sizeof(GM65_LUU));
@@ -613,7 +614,7 @@ void setup() {
 }
 
 void loop() {
-  // 1) Đầu đọc GM65 (tự quét liên tục)
+  // 1) Đầu đọc GM65 (tự quét)
   while (mayQuet.available()) {
     if (nhanByteGM65((uint8_t)mayQuet.read())) { bufQuet[lenQuet] = '\0'; lenQuet = 0; xuLyMaTuGM65(bufQuet); }
   }

@@ -6,7 +6,7 @@ Bản này thay bản "bấm nút" ngày 24/10/2026. Máy **không còn nút qu�
 
 ## 1. Máy làm được gì
 
-- **Tự quét.** GM65 quét liên tục. Học sinh đưa thẻ QR trước đầu đọc, máy kêu bíp và đọc ngay.
+- **Tự quét.** GM65 ở chế độ cảm ứng: đèn chiếu chỉ bật khi có thẻ đưa vào. Học sinh đưa thẻ QR trước đầu đọc, máy kêu bíp và đọc ngay.
 - **Uno tự suy luận.** Uno đếm nguyên tử, đếm nguyên tố, kết luận đơn chất / hợp chất, liên kết ion / cộng hóa trị. LCD hiện 5 màn kết quả, giống chương trình `may_doc_the_phan_tu`.
 - **Tự gửi lên web.** Mỗi kết quả được Uno gửi sang ESP32, ESP32 đẩy lên Firebase. Trang web của lớp hiện ngay bài lý thuyết, hình 3D, nhật ký và kết quả của mọi nhóm (chế độ **Cả lớp**).
 - **Đèn báo 3 trạng thái** (thêm màu đỏ khi thẻ lỗi):
@@ -41,7 +41,7 @@ Bản này thay bản "bấm nút" ngày 24/10/2026. Máy **không còn nút qu�
 | Linh kiện | SL/bộ | Ghi chú |
 |---|---|---|
 | Mạch Uno SMD CH340 + cáp USB-B | 1 | Bộ não |
-| Module quét mã GM65 | 1 | Tự quét liên tục |
+| Module quét mã GM65 | 1 | Tự quét (chế độ cảm ứng) |
 | LCD 1602 + mạch I2C | 1 | Địa chỉ 0x27 (hoặc 0x3F) |
 | **Mạch LED đổi màu MKE-M22 WS2812B** | 1 | **Mới.** Kèm cáp 3 chân. Thay cho nút nhấn |
 | ESP32 NodeMCU-32S + cáp micro USB | 1 | Cầu nối Internet |
@@ -84,12 +84,14 @@ Xem **H3** (`hinh/h3_lap_mach_that.png`) để thấy dây nối trên linh ki�
 
 ## 5. Cài GM65
 
-Chương trình Uno **tự chuyển GM65 sang chế độ quét liên tục** mỗi lần khởi động. Uno đọc ô cài đặt 0x0000, chỉ đổi 2 bit chọn chế độ thành "liên tục", rồi lưu vào bộ nhớ của GM65.
+Chương trình Uno **tự cài GM65** mỗi lần khởi động, chỉ ghi khi cài đặt đang sai, rồi lưu vào bộ nhớ của GM65:
+- ô 0x0000: chế độ **cảm ứng** (`CHE_DO_GM65 3`; đổi thành `2` nếu muốn quét liên tục, đèn chiếu luôn sáng);
+- ô 0x000D: **xuất mã qua cổng nối tiếp (UART)**. Nếu GM65 đang ở chế độ bàn phím USB, nó vẫn kêu bíp khi quét nhưng Uno không nhận được gì.
 
-Kiểm tra: sau khi bật, GM65 phải sáng đèn đỏ quét liên tục (hoặc sáng khi có thẻ đưa vào).
+Kiểm tra: sau khi bật, đèn chiếu của GM65 tắt; đưa thẻ vào thì đèn bật, kêu bíp và LCD đổi.
 
 Nếu GM65 không tự quét:
-1. Dùng tờ **mã cấu hình** đi kèm GM65, quét lần lượt: **UART (TTL)** → **9600 baud** → **Continuous mode** (quét liên tục).
+1. Dùng tờ **mã cấu hình** đi kèm GM65, quét lần lượt: **UART (TTL)** → **9600 baud** → **Induction mode** (cảm ứng).
 2. Bấm RESET Uno.
 
 Cách này chỉ cần làm một lần; GM65 nhớ cài đặt.
@@ -108,7 +110,8 @@ Cách này chỉ cần làm một lần; GM65 nhớ cài đặt.
 
 | Dòng | Ý nghĩa |
 |---|---|
-| `#define CAI_DAT_GM65 1` | 1 = tự đặt GM65 sang quét liên tục; 0 = giữ cài đặt sẵn |
+| `#define CAI_DAT_GM65 1` | 1 = tự cài chế độ quét và cổng UART cho GM65; 0 = giữ cài đặt sẵn |
+| `#define CHE_DO_GM65 3` | 3 = cảm ứng (đèn chiếu bật khi có thẻ); 2 = quét liên tục |
 | `#define DO_SANG_LED 60` | Độ sáng đèn 0–255. WS2812B rất chói, 40–80 là vừa |
 | `THOI_GIAN_QUEN_THE = 1500` | Thẻ phải rời vùng đọc quá 1,5 giây thì quét lại mới tính là lần mới |
 | `LiquidCrystal_I2C lcd(0x27, 16, 2);` | LCD không hiện chữ thì thử `0x3F` |
@@ -161,7 +164,7 @@ Thẻ để yên trước đầu đọc chỉ được tính **một lần**; m�
 |---|---|
 | Đèn LED không sáng | Kiểm tra DI → D10, 5V, GND. Một số mạch có chân DI và DO: phải nối vào **DI** |
 | Đèn sáng sai màu (ví dụ xanh lá thay vì đỏ) | Không phải mạch WS2812B (GRB). Báo lại để đổi thứ tự màu trong chương trình |
-| GM65 không sáng, không kêu | GM65 chưa ở UART 9600 hoặc chưa ở chế độ liên tục (mục 5); kiểm tra GM65 TX → **D8**, RX → **D9** |
+| GM65 không sáng, không kêu | GM65 chưa ở UART 9600 hoặc chưa ở chế độ cảm ứng (mục 5); kiểm tra GM65 TX → **D8**, RX → **D9** |
 | GM65 kêu bíp nhưng LCD không đổi | Sai tốc độ baud: đặt lại GM65 về 9600 bằng mã cấu hình |
 | Không bao giờ hiện `Da noi Internet` | Xem Serial ESP32 (115200): lỗi WiFi / Firebase, xem `HUONG_DAN_ESP32CAM_FIREBASE.md` mục 9. Kiểm tra dây GPIO4 → LV1, HV1 → D7 |
 | Có `Da noi Internet` nhưng web không có kết quả | Kiểm tra dây **D1 → HV2, LV2 → GPIO16**. Serial ESP32 phải in `[Uno] KQ ...` sau mỗi lần quét |
