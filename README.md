@@ -20,7 +20,7 @@ Tác giả: Trí Huệ.
 
 ## Đèn LED
 
-🔵 chưa quét · 🟡 đã quét · 🟢 quét xong (đã gửi web) · 🔴 thẻ lỗi
+🔵 chưa quét · 🟡 đã quét · 🟢 quét xong (đã gửi web, 3 giây sau về 🔵) · 🔴 thẻ lỗi
 
 ## Lưu ý
 

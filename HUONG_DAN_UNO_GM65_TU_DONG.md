@@ -15,7 +15,7 @@ Bản này thay bản "bấm nút" ngày 24/10/2026. Máy **không còn nút qu�
 |---|---|---|
 | 🔵 **Xanh dương** | **Chưa quét** | Máy đang chờ thẻ (sau khi bật, sau khi XÓA, sau khi hết báo lỗi) |
 | 🟡 **Vàng** | **Đã quét** | Vừa đọc được thẻ; hoặc đang lắp ghép, chờ thẻ nguyên tử tiếp theo hay thẻ XONG |
-| 🟢 **Xanh lá** | **Quét xong** | Đã kết luận và đã gửi lên web (khoảng 0,4 giây sau khi đọc thẻ) |
+| 🟢 **Xanh lá** | **Quét xong** | Đã kết luận và đã gửi lên web (khoảng 0,4 giây sau khi đọc thẻ). Sáng 3 giây rồi về 🔵 để quét thẻ tiếp; LCD vẫn hiện kết quả |
 | 🔴 Đỏ | Thẻ lỗi | Mã lạ hoặc công thức sai; đỏ 3 giây rồi về xanh dương |
 
 ```
@@ -137,7 +137,7 @@ Làm như mục 5 và mục 7 của tệp `HUONG_DAN_ESP32CAM_FIREBASE.md` (tạ
 | Việc | Cách làm | Đèn | LCD |
 |---|---|---|---|
 | Chờ | Bật máy | 🔵 | `  QUET THE QR` / `Da noi Internet` |
-| Quét một chất | Đưa thẻ chất (ví dụ H₂O) trước GM65 | 🟡 rồi 🟢 | 5 màn kết quả; web hiện ngay |
+| Quét một chất | Đưa thẻ chất (ví dụ H₂O) trước GM65 | 🟡 rồi 🟢, 3 giây sau về 🔵 | 5 màn kết quả; web hiện ngay |
 | Lắp ghép | Quét lần lượt thẻ nguyên tử (H, H, O), rồi thẻ **XONG** | 🟡 suốt lúc lắp, 🟢 khi XONG | `Da quet: 3 the` rồi 5 màn kết quả |
 | Hai thẻ giống nhau liền nhau | Rút thẻ ra **hơn 1,5 giây** rồi đưa lại (hoặc dùng hai thẻ H) | 🟡 | số thẻ tăng |
 | Thẻ lỗi | — | 🔴 3 giây | Báo lỗi, rồi về màn chờ |

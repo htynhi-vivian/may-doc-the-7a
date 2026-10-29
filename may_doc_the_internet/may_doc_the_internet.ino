@@ -53,6 +53,7 @@ const unsigned long THOI_GIAN_MOI_MAN = 2000;    // ms, mỗi màn kết quả
 const unsigned long THOI_GIAN_BAO_LOI = 3000;
 const unsigned long THOI_GIAN_QUEN_THE = 1500;   // ms: cùng một thẻ phải rời vùng đọc lâu hơn chừng này mới tính là lần quét mới
 const unsigned long KHOANG_LANG_KET_THUC = 60;   // ms không có byte mới = hết mã
+const unsigned long THOI_GIAN_XANH_LA = 3000;    // ms: đèn xanh lá (quét xong) rồi về xanh dương
 
 /* Kiểu dữ liệu “loại chất”. Phải khai báo Ở ĐẦU TỆP, trước mọi hàm
  * (Arduino IDE tự chèn khai báo hàm lên trước hàm đầu tiên). */
@@ -254,7 +255,7 @@ const uint8_t GM65_LUU[]     PROGMEM = {0x7E, 0x00, 0x09, 0x01, 0x00, 0x00, 0x00
 /* ---------- Đèn LED RGB WS2812B (1 bóng) ----------
  * Dùng thư viện Adafruit NeoPixel. Ngắt bị tắt khoảng 30 µs mỗi lần đổi màu (không ảnh hưởng đọc thẻ). */
 #if defined(__AVR__)
-Adafruit_NeoPixel denRGB(1, CHAN_LED_RGB, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel denRGB(1, CHAN_LED_RGB, NEO_GRB + NEO_KHZ800);   // MKE-M22: thứ tự màu G-R-B (đã thử trên mạch thật)
 #endif
 void guiMauWS2812(uint8_t r, uint8_t g, uint8_t b) {
 #if defined(__AVR__)
@@ -267,13 +268,14 @@ void guiMauWS2812(uint8_t r, uint8_t g, uint8_t b) {
 
 MauDen denHienTai = DEN_LOI;
 unsigned long tDoiXanhLa = 0;            // > 0: sắp chuyển sang xanh lá (để kịp thấy màu vàng)
+unsigned long tVeXanhDuong = 0;          // > 0: sắp về xanh dương = sẵn sàng quét thẻ tiếp
 void datDen(MauDen m) {
   if (m == denHienTai) return;
   denHienTai = m;
   const uint8_t s = DO_SANG_LED;
   switch (m) {
     case DEN_CHUA_QUET: guiMauWS2812(0, 0, s); break;              // xanh dương
-    case DEN_DA_QUET:   guiMauWS2812(s, (uint8_t)(s * 3 / 5), 0); break;  // vàng
+    case DEN_DA_QUET:   guiMauWS2812(s, s, 0); break;                  // vàng (đỏ = xanh lá; ít xanh lá hơn sẽ thành cam)
     case DEN_QUET_XONG: guiMauWS2812(0, s, 0); break;              // xanh lá
     case DEN_LOI:       guiMauWS2812(s, 0, 0); break;              // đỏ
   }
@@ -360,14 +362,14 @@ void inCongThuc(uint8_t hang, const char* ct) {
 void dongCho2() { dong(1, coMang ? F("Da noi Internet") : F("KHTN7 - Bai 5, 6")); }
 void manHinhCho() {
   cheDo = CHO_QUET;
-  tDoiXanhLa = 0; datDen(DEN_CHUA_QUET);
+  tDoiXanhLa = 0; tVeXanhDuong = 0; datDen(DEN_CHUA_QUET);
   dong(0, F("  QUET THE QR"));
   dongCho2();
 }
 
 void baoLoi(const char* d1, const char* d2) {
   cheDo = BAO_LOI;
-  tDoiXanhLa = 0; datDen(DEN_LOI);
+  tDoiXanhLa = 0; tVeXanhDuong = 0; datDen(DEN_LOI);
   tDoiMan = millis();
   dong(0, d1);
   dong(1, d2);
@@ -439,6 +441,7 @@ void batDauHienKetQua() {
   demLanQuet++;
   guiKetQua();                         // tự gửi lên web ngay sau khi kết luận
   tDoiXanhLa = millis() + 400;         // vàng thêm 0,4 giây rồi chuyển xanh lá = quét xong
+  tVeXanhDuong = 0;
 }
 
 /* ===== ⑥ XỬ LÝ THẺ ===== */
@@ -646,7 +649,12 @@ void loop() {
   }
 
   // 4) Đèn: vàng -> xanh lá khi đã kết luận xong
-  if (tDoiXanhLa && (long)(millis() - tDoiXanhLa) >= 0) { tDoiXanhLa = 0; if (cheDo == HIEN_KET_QUA) datDen(DEN_QUET_XONG); }
+  if (tDoiXanhLa && (long)(millis() - tDoiXanhLa) >= 0) {
+    tDoiXanhLa = 0;
+    if (cheDo == HIEN_KET_QUA) { datDen(DEN_QUET_XONG); tVeXanhDuong = millis() + THOI_GIAN_XANH_LA; }
+  }
+  // xanh lá vài giây rồi về xanh dương (LCD vẫn luân phiên màn kết quả)
+  if (tVeXanhDuong && (long)(millis() - tVeXanhDuong) >= 0) { tVeXanhDuong = 0; if (cheDo == HIEN_KET_QUA) datDen(DEN_CHUA_QUET); }
 
   // 5) Luân phiên màn kết quả / hết thời gian báo lỗi
   if (cheDo == HIEN_KET_QUA && millis() - tDoiMan >= THOI_GIAN_MOI_MAN) {
