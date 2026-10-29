@@ -3,104 +3,226 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thẻ QR KHTN 7</title>
+<title>Bộ thẻ QR KHTN 7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
-  :root { --nen: #fff; --chu: #111; --phu: #666; --vien: #bbb; --nhan: #0b6bcb; }
+  :root { --chu: #0f172a; --phu: #475569; --nhat: #94a3b8; --vien: #b6bfcc;
+          --chat: #1d4ed8; --nt: #15803d; --lenh: #c2410c; --nen: #e5e7eb; }
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px; background: var(--nen); color: var(--chu);
-         font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif; }
-  header { max-width: 900px; margin: 0 auto 12px; }
-  h1 { font-size: 22px; margin: 0 0 6px; }
-  header p { margin: 4px 0; color: var(--phu); font-size: 14px; line-height: 1.45; }
-  .nut { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-  .nut button, .nut label { font: inherit; font-size: 14px; padding: 7px 12px; border: 1px solid var(--vien);
-         border-radius: 8px; background: #f5f5f5; cursor: pointer; }
-  .nut button.chinh { background: var(--nhan); color: #fff; border-color: var(--nhan); }
-  h2 { max-width: 900px; margin: 18px auto 8px; font-size: 17px; }
-  .luoi { max-width: 900px; margin: 0 auto; display: grid; gap: 0;
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  .the { border: 1px dashed var(--vien); padding: 10px 8px 8px; text-align: center;
-         break-inside: avoid; page-break-inside: avoid; }
-  .the svg { width: 100%; max-width: 130px; height: auto; display: block; margin: 0 auto; }
-  .ct { font-size: 22px; font-weight: 700; margin-top: 6px; line-height: 1.1; }
-  .ten { font-size: 12px; color: var(--phu); margin-top: 2px; min-height: 15px; }
-  .ma { font: 10px ui-monospace, Consolas, monospace; color: var(--phu); margin-top: 3px; word-break: break-all; }
-  .the.nt .ct { font-size: 30px; }
-  .the.lenh .ct { font-size: 18px; color: var(--nhan); }
-  .an { display: none !important; }
-  @page { size: A4; margin: 10mm; }
+  body { margin: 0; background: var(--nen); color: var(--chu);
+         font-family: "DejaVu Sans", system-ui, "Segoe UI", Roboto, Arial, sans-serif; }
+  .dieu-khien { max-width: 210mm; margin: 16px auto; padding: 0 16px; }
+  .dieu-khien h1 { font-size: 20px; margin: 0 0 6px; }
+  .dieu-khien p { margin: 4px 0; color: var(--phu); font-size: 14px; line-height: 1.45; }
+  .nut { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; align-items: center; }
+  .nut button, .nut label { font: inherit; font-size: 14px; padding: 7px 12px; border: 1px solid #9ca3af;
+         border-radius: 8px; background: #fff; cursor: pointer; }
+  .nut button { background: var(--chat); color: #fff; border-color: var(--chat); font-weight: 700; }
+
+  .to { width: 210mm; min-height: 297mm; margin: 0 auto 16px; background: #fff; padding: 9mm 10mm 7mm;
+        box-shadow: 0 2px 10px rgba(0,0,0,.15); display: flex; flex-direction: column; }
+  .to h2 { font-size: 12.5pt; margin: 0; letter-spacing: .2px; }
+  .to .phu { font-size: 8pt; color: var(--phu); margin: 1mm 0 3mm; }
+  .luoi { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr);
+          border-top: 1px dashed var(--vien); border-left: 1px dashed var(--vien); flex: 1; }
+  .the { border-right: 1px dashed var(--vien); border-bottom: 1px dashed var(--vien); padding: 3mm 3mm 2mm;
+         display: flex; flex-direction: column; align-items: center; min-height: 0; }
+  .the.trong { background: repeating-linear-gradient(45deg, #fff 0 6px, #f8fafc 6px 12px); }
+  .dai { width: 100%; display: flex; justify-content: space-between; align-items: center; color: #fff;
+         font-weight: 700; font-size: 8.5pt; padding: 1.4mm 2.2mm; }
+  .dai span:last-child { font-weight: 400; font-size: 7.5pt; }
+  .chat .dai { background: var(--chat); } .nt .dai { background: var(--nt); } .lenh .dai { background: var(--lenh); }
+  .the svg { width: 29mm; height: 29mm; margin: 4mm 0 auto; display: block; }
+  .ct { font-size: 21pt; font-weight: 800; line-height: 1; margin-top: 3mm; white-space: nowrap; }
+  .ct sub { font-size: 60%; }
+  .ten { font-size: 8pt; color: var(--phu); margin-top: 1.4mm; text-align: center; }
+  .bai { font-size: 6.5pt; color: var(--nhat); margin-top: .8mm; }
+  .chan { font-size: 7pt; color: var(--nhat); text-align: center; margin-top: 2mm; }
+
+  .da h2 { font-size: 13pt; margin-bottom: 1mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 7.6pt; }
+  th { background: #e0e7ff; text-align: left; padding: 1.1mm 1.2mm; }
+  td { padding: .75mm 1.2mm; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  td b { font-size: 8.4pt; }
+  tr.lech td { background: #fde2e2; }
+  .da h3 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
+  .lg { columns: 2; font-size: 8pt; line-height: 1.55; margin: 0; padding: 0; list-style: none; }
+  .gc { font-size: 8pt; line-height: 1.5; margin: 0; padding-left: 4mm; }
+
+  .an-da .da { display: none; }
+  @page { size: A4; margin: 0; }
   @media print {
-    body { padding: 0; }
-    header, .nut { display: none; }
-    h2 { margin: 6mm 0 3mm; font-size: 13pt; break-after: avoid; }
-    .luoi { max-width: none; grid-template-columns: repeat(4, 1fr); }
-    .the { padding: 3mm 2mm; }
-    .the svg { max-width: 34mm; }
+    body { background: #fff; }
+    .dieu-khien { display: none; }
+    .to { margin: 0; box-shadow: none; break-after: page; height: 297mm; }
+    .to:last-child { break-after: auto; }
+    .to.da { height: auto; min-height: 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+    .da tr, .da li { break-inside: avoid; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  @media screen and (max-width: 820px) {
+    .to { zoom: .45; }
   }
 </style>
 </head>
 <body>
-<header>
-  <h1>Thẻ QR – Máy đọc thẻ phân tử KHTN 7</h1>
-  <p>In trên giấy A4 (nên dùng giấy bìa cứng), cắt theo đường nét đứt. Mỗi trang in 4 thẻ một hàng; khi in chọn <b>Khổ A4</b>, <b>Tỷ lệ 100%</b> và bật <b>In nền / Background graphics</b> nếu có.</p>
-  <p><b>Thẻ chất</b>: quét một thẻ là máy kết luận ngay. <b>Thẻ nguyên tử</b>: quét lần lượt nhiều thẻ (ví dụ H, H, O) rồi quét thẻ <b>XONG</b> để máy lắp ghép thành chất; thẻ <b>XÓA</b> để làm lại.</p>
+<div class="dieu-khien">
+  <h1>Bộ thẻ QR – Máy đọc thẻ phân tử KHTN 7 (Bài 5 + Bài 6)</h1>
+  <p><b>Mỗi chất chỉ có 1 thẻ</b>, dùng chung cho cả Bài 5 và Bài 6 (dòng chữ nhỏ dưới tên cho biết thẻ dùng ở bài nào). Thẻ nguyên tử có nhiều bản để lắp ghép (ví dụ H, H, O).</p>
+  <p>In giấy bìa A4, <b>tỉ lệ 100 %</b> (không chọn “Fit to page”), bật <b>In nền / Background graphics</b>, rồi cắt theo đường nét đứt.</p>
   <div class="nut">
-    <button class="chinh" onclick="window.print()">In thẻ</button>
-    <label><input type="checkbox" data-nhom="chat" checked> Thẻ chất</label>
-    <label><input type="checkbox" data-nhom="nt" checked> Thẻ nguyên tử</label>
-    <label><input type="checkbox" data-nhom="lenh" checked> Thẻ lệnh</label>
+    <button onclick="window.print()">In thẻ</button>
+    <label><input type="checkbox" id="kemDA" checked> Kèm trang đáp án cho giáo viên</label>
   </div>
-</header>
-
-<section data-nhom="chat"><h2>Thẻ chất (42 thẻ)</h2><div class="luoi" id="chat"></div></section>
-<section data-nhom="nt"><h2>Thẻ nguyên tử (33 thẻ)</h2><div class="luoi" id="nt"></div></section>
-<section data-nhom="lenh"><h2>Thẻ lệnh</h2><div class="luoi" id="lenh"></div></section>
+</div>
+<div id="cac-to"></div>
 
 <script>
-// Tên trong mã QR viết không dấu, tối đa 16 ký tự (màn hình LCD 1602 chỉ hiện được như vậy)
+// [công thức, tên trong mã QR (không dấu, ≤16 ký tự, hiện trên LCD), tên in trên thẻ, bài dùng]
+// Mã QR giữ đúng như hai bộ thẻ Bài 5 / Bài 6 đã in; mỗi công thức chỉ xuất hiện một lần.
 const CHAT = [
-  ["H2O", "Nuoc", "Nước"], ["O2", "Khi oxygen", "Khí oxygen"], ["O3", "Ozone", "Ozone"],
-  ["H2", "Khi hydrogen", "Khí hydrogen"], ["N2", "Khi nitrogen", "Khí nitrogen"],
-  ["Cl2", "Khi chlorine", "Khí chlorine"], ["F2", "Khi fluorine", "Khí fluorine"],
-  ["He", "Khi helium", "Khí helium"], ["Ne", "Khi neon", "Khí neon"], ["Ar", "Khi argon", "Khí argon"],
-  ["Fe", "Sat", "Sắt"], ["Cu", "Dong", "Đồng"], ["Co", "Cobalt", "Cobalt"], ["C", "Carbon", "Carbon"],
-  ["S", "Luu huynh", "Lưu huỳnh"], ["P", "Phosphorus", "Phosphorus"],
-  ["CO2", "Carbon dioxide", "Carbon dioxide"], ["CO", "Carbon monoxide", "Carbon monoxide"],
-  ["NaCl", "Muoi an", "Muối ăn"], ["CH4", "Methane", "Methane"], ["NH3", "Ammonia", "Ammonia"],
-  ["CaCO3", "Da voi", "Đá vôi"], ["Ca(OH)2", "Voi toi", "Vôi tôi"], ["H2SO4", "Sulfuric acid", "Sulfuric acid"],
-  ["C6H12O6", "Glucose", "Glucose"], ["C2H5OH", "Ethanol (con)", "Ethanol (cồn)"],
-  ["Al2O3", "Aluminium oxide", "Aluminium oxide"], ["MgO", "Magnesium oxide", "Magnesium oxide"],
-  ["KCl", "Kali chloride", "Potassium chloride"], ["CaCl2", "Calcium chloride", "Calcium chloride"],
-  ["Na2O", "Sodium oxide", "Sodium oxide"], ["HCl", "Hydro chloride", "Hydrogen chloride"],
-  ["NH4Cl", "Amoni chloride", "Ammonium chloride"], ["CaO", "Voi song", "Vôi sống"],
-  ["K2O", "Potassium oxide", "Potassium oxide"], ["MgCl2", "Magie chloride", "Magnesium chloride"],
-  ["NaF", "Sodium fluoride", "Sodium fluoride"], ["KBr", "Kali bromide", "Potassium bromide"],
-  ["NaOH", "Xut an da", "Xút ăn da"], ["SO2", "Sulfur dioxide", "Sulfur dioxide"],
-  ["H2S", "Hydrogen sulfide", "Hydrogen sulfide"], ["(NH4)2SO4", "Ammonium sulfate", "Ammonium sulfate"]
+  ["Al2O3", "Aluminium oxide", "Aluminium oxide", "56"],
+  ["Ar", "Argon", "Argon", "6"],
+  ["C", "Carbon (than)", "Carbon (than)", "5"],
+  ["C2H5OH", "Ethanol", "Ethanol (cồn)", "56"],
+  ["C6H12O6", "Glucose", "Glucose", "5"],
+  ["Ca(OH)2", "Voi toi", "Vôi tôi", "5"],
+  ["CaCl2", "Calcium chloride", "Calcium chloride", "6"],
+  ["CaCO3", "Da voi", "Đá vôi", "5"],
+  ["CaF2", "Calcium fluoride", "Calcium fluoride", "6"],
+  ["CaO", "Calcium oxide", "Calcium oxide (vôi sống)", "6"],
+  ["CH4", "Methane", "Methane", "56"],
+  ["Cl2", "Chlorine", "Chlorine", "56"],
+  ["CO", "Carbon monoxide", "Carbon monoxide", "5"],
+  ["Co", "Cobalt", "Cobalt", "5"],
+  ["CO2", "Carbon dioxide", "Carbon dioxide", "56"],
+  ["Cu", "Dong", "Đồng", "5"],
+  ["F2", "Fluorine", "Fluorine", "6"],
+  ["Fe", "Sat", "Sắt", "5"],
+  ["H2", "Hydrogen", "Hydrogen", "56"],
+  ["H2O", "Nuoc", "Nước", "56"],
+  ["H2S", "Hydrogen sulfide", "Hydrogen sulfide", "6"],
+  ["H2SO4", "Sulfuric acid", "Sulfuric acid", "5"],
+  ["HCl", "Hydrogen chlor.", "Hydrogen chloride", "6"],
+  ["He", "Helium", "Helium", "56"],
+  ["K2O", "Potassium oxide", "Potassium oxide", "6"],
+  ["KBr", "Potass. bromide", "Potassium bromide", "6"],
+  ["KCl", "Potass. chloride", "Potassium chloride", "6"],
+  ["MgCl2", "Magnes. chloride", "Magnesium chloride", "6"],
+  ["MgO", "Magnesium oxide", "Magnesium oxide", "6"],
+  ["N2", "Nitrogen", "Nitrogen", "56"],
+  ["Na2O", "Sodium oxide", "Sodium oxide", "6"],
+  ["NaCl", "Muoi an", "Muối ăn (sodium chloride)", "56"],
+  ["NaF", "Sodium fluoride", "Sodium fluoride", "6"],
+  ["Ne", "Neon", "Neon", "56"],
+  ["NH3", "Ammonia", "Ammonia", "56"],
+  ["NH4Cl", "Ammonium chlor.", "Ammonium chloride", "6"],
+  ["(NH4)2SO4", "Ammonium sulfate", "Ammonium sulfate", "6"],
+  ["O2", "Oxygen", "Oxygen", "56"],
+  ["O3", "Ozone", "Ozone", "5"],
+  ["S", "Luu huynh", "Lưu huỳnh", "5"],
+  ["SO2", "Sulfur dioxide", "Sulfur dioxide", "6"],
 ];
-const NGUYEN_TO = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
-                   "Cr","Mn","Fe","Co","Cu","Zn","Br","Ag","I","Ba","Au","Hg","Pb"];
-const LENH = [["LENH:XONG", "XONG", "Lắp ghép xong"], ["LENH:XOA", "XÓA", "Làm lại từ đầu"]];
+// [ký hiệu, tên in, số bản]
+const NGUYEN_TU = [
+  ["H", "Hydrogen", 6], ["O", "Oxygen", 4], ["C", "Carbon", 2], ["N", "Nitrogen", 2],
+  ["Na", "Sodium (natri)", 2], ["Cl", "Chlorine", 3], ["S", "Sulfur", 2], ["Ca", "Calcium", 2],
+  ["K", "Potassium (kali)", 2], ["Mg", "Magnesium", 2], ["F", "Fluorine", 2],
+];
+const LENH = [["LENH:XONG", "XONG", "Lắp ghép xong → máy kết luận"], ["LENH:XOA", "XÓA", "Làm lại từ đầu"]];
 
-const chiSo = (ct) => ct.replace(/([A-Za-z)])(\d+)/g, "$1<sub>$2</sub>");
+// Bảng nguyên tố giống trong may_doc_the_internet.ino (đủ cho bộ thẻ): khối lượng, loại (kl / pk / kh)
+const NT = { H: [1, "pk"], He: [4, "kh"], C: [12, "pk"], N: [14, "pk"], O: [16, "pk"], F: [19, "pk"], Ne: [20, "kh"],
+  Na: [23, "kl"], Mg: [24, "kl"], Al: [27, "kl"], S: [32, "pk"], Cl: [35.5, "pk"], Ar: [40, "kh"], K: [39, "kl"],
+  Ca: [40, "kl"], Fe: [56, "kl"], Co: [59, "kl"], Cu: [64, "kl"], Br: [80, "pk"] };
 
-function the(noi, ma, chu, ten, lop) {
-  const qr = qrcode(0, "M"); qr.addData(ma); qr.make();
-  const d = document.createElement("div");
-  d.className = "the " + lop;
-  d.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }) +
-    `<div class="ct">${chu}</div><div class="ten">${ten}</div><div class="ma">${ma}</div>`;
-  document.getElementById(noi).appendChild(d);
+function phanTich(ct) {          // "Ca(OH)2" -> {Ca:1, O:2, H:2}
+  const dem = {}; const ngan = [dem];
+  for (const [, ky, so, mo, dong, soDong] of ct.matchAll(/([A-Z][a-z]?)(\d*)|(\()|(\))(\d*)/g)) {
+    if (mo) ngan.push({});
+    else if (dong) { const t = ngan.pop(), k = +soDong || 1, d = ngan[ngan.length - 1];
+      for (const e in t) d[e] = (d[e] || 0) + t[e] * k; }
+    else { const d = ngan[ngan.length - 1]; d[ky] = (d[ky] || 0) + (+so || 1); }
+  }
+  return dem;
+}
+function ketQua(ct) {             // giống cách máy kết luận (Bài 5: đơn/hợp chất; Bài 6: loại liên kết)
+  const p = phanTich(ct), ky = Object.keys(p);
+  const soNT = ky.reduce((s, e) => s + p[e], 0), klpt = ky.reduce((s, e) => s + p[e] * NT[e][0], 0);
+  const coKL = ky.some((e) => NT[e][1] === "kl"), coPK = ky.some((e) => NT[e][1] === "pk");
+  let b5, b6, hat;
+  if (ky.length === 1) {
+    b5 = "DON CHAT"; const l = NT[ky[0]][1];
+    b6 = l === "kl" ? "Đơn chất KIM LOẠI" : l === "kh" ? "Đơn chất KHÍ HIẾM" : "Đơn chất PHI KIM";
+    hat = soNT > 1 ? "Phân tử" : "Nguyên tử";
+  } else if (coKL && coPK) { b5 = "HOP CHAT ION"; b6 = "ION (KL + PK)"; hat = "Các ion"; }
+  else { b5 = "HOP CHAT"; b6 = "CỘNG HÓA TRỊ"; hat = "Phân tử"; }
+  return { soNT, soNTo: ky.length, klpt, b5, b6, hat };
 }
 
-CHAT.forEach(([ct, khongDau, ten]) => the("chat", `CT:${ct}|${khongDau}`, chiSo(ct), ten, "chat"));
-NGUYEN_TO.forEach((k) => the("nt", `NT:${k}`, k, "", "nt"));
-LENH.forEach(([ma, chu, ten]) => the("lenh", ma, chu, ten, "lenh"));
+const chiSo = (ct) => ct.replace(/([A-Za-z)])(\d+)/g, "$1<sub>$2</sub>");
+const baiChu = (b) => b === "56" ? "Bài 5 · Bài 6" : "Bài " + b;
+const CHAN = "Máy đọc thẻ phân tử · Trí Huệ · Thẻ xanh dương = chất · xanh lá = nguyên tử để lắp ghép · cam = lệnh";
 
-document.querySelectorAll("input[data-nhom]").forEach((o) => o.addEventListener("change", () => {
-  document.querySelector(`section[data-nhom="${o.dataset.nhom}"]`).classList.toggle("an", !o.checked);
-}));
+// Danh sách 72 thẻ = 6 tờ × 12 thẻ
+const THE = [];
+CHAT.forEach(([ct, khongDau, ten, bai], i) => THE.push({ lop: "chat", loai: "THẺ CHẤT", so: "C" + String(i + 1).padStart(2, "0"),
+  ma: `CT:${ct}|${khongDau}`, chu: chiSo(ct), ten, bai: baiChu(bai) }));
+let k = 0;
+NGUYEN_TU.forEach(([ky, ten, n]) => { for (let j = 0; j < n; j++) THE.push({ lop: "nt", loai: "THẺ NGUYÊN TỬ",
+  so: "N" + String(++k).padStart(2, "0"), ma: `NT:${ky}`, chu: ky, ten, bai: "" }); });
+LENH.forEach(([ma, chu, ten], i) => THE.push({ lop: "lenh", loai: "THẺ LỆNH", so: "L" + (i + 1), ma, chu, ten, bai: "" }));
+
+function svgQR(ma) { const q = qrcode(0, "M"); q.addData(ma); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+
+const noi = document.getElementById("cac-to");
+const soTo = Math.ceil(THE.length / 12);
+let html = "";
+for (let t = 0; t < soTo; t++) {
+  html += `<section class="to"><h2>BỘ THẺ QR — KHTN 7, BÀI 5 + BÀI 6 (mỗi chất 1 thẻ)</h2>
+    <div class="phu">Tờ ${t + 1}/${soTo} · cắt theo đường nét đứt · in khổ A4, tỉ lệ 100 % (không chọn “Fit to page”)</div><div class="luoi">`;
+  for (let i = t * 12; i < t * 12 + 12; i++) {
+    const c = THE[i];
+    html += c ? `<div class="the ${c.lop}"><div class="dai"><span>${c.loai}</span><span>${c.so}</span></div>${svgQR(c.ma)}
+      <div class="ct">${c.chu}</div><div class="ten">${c.ten}</div>${c.bai ? `<div class="bai">${c.bai}</div>` : ""}</div>`
+      : `<div class="the trong"></div>`;
+  }
+  html += `</div><div class="chan">${CHAN}</div></section>`;
+}
+
+// Trang đáp án cho giáo viên
+let hang = "";
+CHAT.forEach(([ct, khongDau, ten, bai], i) => {
+  const r = ketQua(ct), lech = ct === "NH4Cl" || ct === "(NH4)2SO4";
+  hang += `<tr${lech ? ' class="lech"' : ""}><td>C${String(i + 1).padStart(2, "0")}</td><td><b>${chiSo(ct)}</b></td><td>${ten}</td>
+    <td>${bai === "56" ? "5, 6" : bai}</td><td>${r.soNT}</td><td>${r.soNTo}</td><td><b>${r.b5}</b></td><td><b>${r.b6}</b>${lech ? " → máy SAI" : ""}</td>
+    <td>${r.hat}</td><td>${r.klpt.toFixed(1)}</td></tr>`;
+});
+html += `<section class="to da"><h2>ĐÁP ÁN CHO GIÁO VIÊN — máy kết luận gì với từng thẻ chất</h2>
+  <div class="phu">Tính theo đúng quy tắc của may_doc_the_internet.ino. Không phát tờ này cho học sinh. Cột “Bài 5” là dòng kết luận trên LCD, cột “Bài 6” là màn hình liên kết.</div>
+  <table><tr><th>Thẻ</th><th>Công thức</th><th>Tên</th><th>Bài</th><th>Ng.tử</th><th>Ng.tố</th><th>Bài 5 (LCD)</th><th>Bài 6 (LCD)</th><th>Hạt</th><th>KLPT</th></tr>${hang}</table>
+  <h3>Lắp ghép bằng thẻ nguyên tử (quét từng thẻ, rồi quét thẻ XONG)</h3>
+  <ul class="lg">
+    <li>H, H, O → H₂O · HOP CHAT</li><li>C, O, O → CO₂ · HOP CHAT</li><li>O, O → O₂ · DON CHAT</li>
+    <li>N, H, H, H → NH₃ · HOP CHAT</li><li>C, H, H, H, H → CH₄ · HOP CHAT</li><li>Na, Cl → NaCl · ION (KL + PK)</li>
+    <li>Ca, O → CaO · ION (KL + PK)</li><li>Mg, O → MgO · ION (KL + PK)</li><li>K, Cl → KCl · ION (KL + PK)</li>
+    <li>H, Cl → HCl · CỘNG HÓA TRỊ</li><li>Cl, Cl → Cl₂ · đơn chất PHI KIM</li><li>Na, F → NaF · ION (KL + PK)</li>
+    <li>N, H, H, H, H, Cl (thử thách) → NH₄Cl</li><li>H, O (bẫy) → HO: máy vẫn đếm, nhưng HO không phải chất bền</li>
+  </ul>
+  <h3>Ghi chú dạy học</h3>
+  <ul class="gc">
+    <li>Mỗi công thức chỉ có <b>một thẻ</b> (C01–C41), xếp theo thứ tự chữ cái để học sinh không đoán được nhóm. Dòng nhỏ dưới tên cho biết thẻ dùng ở Bài 5, Bài 6 hay cả hai.</li>
+    <li>Cặp dễ nhầm: O₂/O₃ (cùng nguyên tố, khác số nguyên tử, đều là đơn chất); Co/CO (chữ thường/hoa: kim loại cobalt và khí carbon monoxide).</li>
+    <li>NaCl, CaCO₃, Ca(OH)₂, Al₂O₃: Bài 5 chỉ cần kết luận HỢP CHẤT; máy báo “hạt là các ion” là nội dung Bài 6.</li>
+    <li>Hai thẻ thử thách NH₄Cl và (NH₄)₂SO₄ (tô hồng): không có kim loại nên máy nói CỘNG HÓA TRỊ, nhưng thực tế có ion NH₄⁺ liên kết ion với Cl⁻ / SO₄²⁻. Cho học sinh tìm vì sao máy sai.</li>
+    <li>Thẻ nguyên tử có nhiều bản (6 H, 4 O, 3 Cl…) để ghép CH₄, NH₄Cl. Hai thẻ giống nhau liên tiếp: rút thẻ ra hơn 1,5 giây rồi quét tiếp.</li>
+    <li>Thẻ cam: XONG = máy kết luận chất vừa lắp ghép; XÓA = làm lại. Đèn: xanh dương chờ · vàng đang đọc / lắp ghép · xanh lá quét xong (3 giây) · đỏ lỗi.</li>
+  </ul></section>`;
+noi.innerHTML = html;
+
+const kemDA = document.getElementById("kemDA");
+kemDA.addEventListener("change", () => document.body.classList.toggle("an-da", !kemDA.checked));
 </script>
 </body>
 </html>
