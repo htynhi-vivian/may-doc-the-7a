@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thẻ QR KHTN 7</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root { --nen: #fff; --chu: #111; --phu: #666; --vien: #bbb; --nhan: #0b6bcb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--nen); color: var(--chu);
+         font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif; }
+  header { max-width: 900px; margin: 0 auto 12px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  header p { margin: 4px 0; color: var(--phu); font-size: 14px; line-height: 1.45; }
+  .nut { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .nut button, .nut label { font: inherit; font-size: 14px; padding: 7px 12px; border: 1px solid var(--vien);
+         border-radius: 8px; background: #f5f5f5; cursor: pointer; }
+  .nut button.chinh { background: var(--nhan); color: #fff; border-color: var(--nhan); }
+  h2 { max-width: 900px; margin: 18px auto 8px; font-size: 17px; }
+  .luoi { max-width: 900px; margin: 0 auto; display: grid; gap: 0;
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .the { border: 1px dashed var(--vien); padding: 10px 8px 8px; text-align: center;
+         break-inside: avoid; page-break-inside: avoid; }
+  .the svg { width: 100%; max-width: 130px; height: auto; display: block; margin: 0 auto; }
+  .ct { font-size: 22px; font-weight: 700; margin-top: 6px; line-height: 1.1; }
+  .ten { font-size: 12px; color: var(--phu); margin-top: 2px; min-height: 15px; }
+  .ma { font: 10px ui-monospace, Consolas, monospace; color: var(--phu); margin-top: 3px; word-break: break-all; }
+  .the.nt .ct { font-size: 30px; }
+  .the.lenh .ct { font-size: 18px; color: var(--nhan); }
+  .an { display: none !important; }
+  @page { size: A4; margin: 10mm; }
+  @media print {
+    body { padding: 0; }
+    header, .nut { display: none; }
+    h2 { margin: 6mm 0 3mm; font-size: 13pt; break-after: avoid; }
+    .luoi { max-width: none; grid-template-columns: repeat(4, 1fr); }
+    .the { padding: 3mm 2mm; }
+    .the svg { max-width: 34mm; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Thẻ QR – Máy đọc thẻ phân tử KHTN 7</h1>
+  <p>In trên giấy A4 (nên dùng giấy bìa cứng), cắt theo đường nét đứt. Mỗi trang in 4 thẻ một hàng; khi in chọn <b>Khổ A4</b>, <b>Tỷ lệ 100%</b> và bật <b>In nền / Background graphics</b> nếu có.</p>
+  <p><b>Thẻ chất</b>: quét một thẻ là máy kết luận ngay. <b>Thẻ nguyên tử</b>: quét lần lượt nhiều thẻ (ví dụ H, H, O) rồi quét thẻ <b>XONG</b> để máy lắp ghép thành chất; thẻ <b>XÓA</b> để làm lại.</p>
+  <div class="nut">
+    <button class="chinh" onclick="window.print()">In thẻ</button>
+    <label><input type="checkbox" data-nhom="chat" checked> Thẻ chất</label>
+    <label><input type="checkbox" data-nhom="nt" checked> Thẻ nguyên tử</label>
+    <label><input type="checkbox" data-nhom="lenh" checked> Thẻ lệnh</label>
+  </div>
+</header>
+
+<section data-nhom="chat"><h2>Thẻ chất (42 thẻ)</h2><div class="luoi" id="chat"></div></section>
+<section data-nhom="nt"><h2>Thẻ nguyên tử (33 thẻ)</h2><div class="luoi" id="nt"></div></section>
+<section data-nhom="lenh"><h2>Thẻ lệnh</h2><div class="luoi" id="lenh"></div></section>
+
+<script>
+// Tên trong mã QR viết không dấu, tối đa 16 ký tự (màn hình LCD 1602 chỉ hiện được như vậy)
+const CHAT = [
+  ["H2O", "Nuoc", "Nước"], ["O2", "Khi oxygen", "Khí oxygen"], ["O3", "Ozone", "Ozone"],
+  ["H2", "Khi hydrogen", "Khí hydrogen"], ["N2", "Khi nitrogen", "Khí nitrogen"],
+  ["Cl2", "Khi chlorine", "Khí chlorine"], ["F2", "Khi fluorine", "Khí fluorine"],
+  ["He", "Khi helium", "Khí helium"], ["Ne", "Khi neon", "Khí neon"], ["Ar", "Khi argon", "Khí argon"],
+  ["Fe", "Sat", "Sắt"], ["Cu", "Dong", "Đồng"], ["Co", "Cobalt", "Cobalt"], ["C", "Carbon", "Carbon"],
+  ["S", "Luu huynh", "Lưu huỳnh"], ["P", "Phosphorus", "Phosphorus"],
+  ["CO2", "Carbon dioxide", "Carbon dioxide"], ["CO", "Carbon monoxide", "Carbon monoxide"],
+  ["NaCl", "Muoi an", "Muối ăn"], ["CH4", "Methane", "Methane"], ["NH3", "Ammonia", "Ammonia"],
+  ["CaCO3", "Da voi", "Đá vôi"], ["Ca(OH)2", "Voi toi", "Vôi tôi"], ["H2SO4", "Sulfuric acid", "Sulfuric acid"],
+  ["C6H12O6", "Glucose", "Glucose"], ["C2H5OH", "Ethanol (con)", "Ethanol (cồn)"],
+  ["Al2O3", "Aluminium oxide", "Aluminium oxide"], ["MgO", "Magnesium oxide", "Magnesium oxide"],
+  ["KCl", "Kali chloride", "Potassium chloride"], ["CaCl2", "Calcium chloride", "Calcium chloride"],
+  ["Na2O", "Sodium oxide", "Sodium oxide"], ["HCl", "Hydro chloride", "Hydrogen chloride"],
+  ["NH4Cl", "Amoni chloride", "Ammonium chloride"], ["CaO", "Voi song", "Vôi sống"],
+  ["K2O", "Potassium oxide", "Potassium oxide"], ["MgCl2", "Magie chloride", "Magnesium chloride"],
+  ["NaF", "Sodium fluoride", "Sodium fluoride"], ["KBr", "Kali bromide", "Potassium bromide"],
+  ["NaOH", "Xut an da", "Xút ăn da"], ["SO2", "Sulfur dioxide", "Sulfur dioxide"],
+  ["H2S", "Hydrogen sulfide", "Hydrogen sulfide"], ["(NH4)2SO4", "Ammonium sulfate", "Ammonium sulfate"]
+];
+const NGUYEN_TO = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
+                   "Cr","Mn","Fe","Co","Cu","Zn","Br","Ag","I","Ba","Au","Hg","Pb"];
+const LENH = [["LENH:XONG", "XONG", "Lắp ghép xong"], ["LENH:XOA", "XÓA", "Làm lại từ đầu"]];
+
+const chiSo = (ct) => ct.replace(/([A-Za-z)])(\d+)/g, "$1<sub>$2</sub>");
+
+function the(noi, ma, chu, ten, lop) {
+  const qr = qrcode(0, "M"); qr.addData(ma); qr.make();
+  const d = document.createElement("div");
+  d.className = "the " + lop;
+  d.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }) +
+    `<div class="ct">${chu}</div><div class="ten">${ten}</div><div class="ma">${ma}</div>`;
+  document.getElementById(noi).appendChild(d);
+}
+
+CHAT.forEach(([ct, khongDau, ten]) => the("chat", `CT:${ct}|${khongDau}`, chiSo(ct), ten, "chat"));
+NGUYEN_TO.forEach((k) => the("nt", `NT:${k}`, k, "", "nt"));
+LENH.forEach(([ma, chu, ten]) => the("lenh", ma, chu, ten, "lenh"));
+
+document.querySelectorAll("input[data-nhom]").forEach((o) => o.addEventListener("change", () => {
+  document.querySelector(`section[data-nhom="${o.dataset.nhom}"]`).classList.toggle("an", !o.checked);
+}));
+</script>
+</body>
+</html>
