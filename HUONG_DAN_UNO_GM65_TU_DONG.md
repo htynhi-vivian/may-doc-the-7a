@@ -97,7 +97,7 @@ Cách này chỉ cần làm một lần; GM65 nhớ cài đặt.
 ## 6. Nạp chương trình cho Arduino Uno
 
 1. Mở `may_doc_the_internet/may_doc_the_internet.ino` bằng Arduino IDE.
-2. Cài thư viện **LiquidCrystal I2C** (Frank de Brabander) nếu chưa có. Đèn LED **không cần thư viện**, chương trình tự điều khiển.
+2. Cài 2 thư viện nếu chưa có (**Library Manager**, gõ tên, bấm **Install**): **LiquidCrystal I2C** (Frank de Brabander) cho màn hình LCD và **Adafruit NeoPixel** cho đèn LED.
 3. Chọn bo **Arduino Uno**, chọn cổng COM, bấm **Upload**. Bản thử biên dịch được: flash 15 392 byte (47 %), RAM 1 384 byte (67 %).
 4. **An toàn khi cắm USB:** tháo 1 viên pin ra khỏi hộp trước khi cắm cáp USB vào Uno, để USB và pin không cùng cấp điện.
 5. Không cần rút dây D1 khi nạp: ESP32 chỉ nghe, gặp dòng lạ thì bỏ qua.

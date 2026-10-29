@@ -22,7 +22,7 @@
  *   Uno gửi kết quả bằng cổng nối tiếp phần cứng (chân TX = D1, cùng đường với Serial Monitor),
  *   nên việc gửi không làm nhiễu việc đọc GM65. Không có ESP32: máy vẫn chạy đủ, chỉ không lên web.
  *
- * Thư viện: LiquidCrystal I2C (Frank de Brabander). Wire, SoftwareSerial có sẵn.
+ * Thư viện: LiquidCrystal I2C (Frank de Brabander), Adafruit NeoPixel. Wire, SoftwareSerial có sẵn.
  *
  * Nội dung mã QR: CT:H2O|Nuoc · NT:H · LENH:XONG · LENH:XOA
  * Serial Monitor (9600, Newline): gõ các mã trên, hoặc H,H,O. Lệnh #INFO: trả lời @{"mach":"uno",...}
@@ -37,6 +37,9 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
+#if defined(__AVR__)
+#include <Adafruit_NeoPixel.h>
+#endif
 #include <string.h>
 #include <stdint.h>
 
@@ -248,50 +251,17 @@ byte chiSoDuoi[8][8] = {
 const uint8_t GM65_LUU[]     PROGMEM = {0x7E, 0x00, 0x09, 0x01, 0x00, 0x00, 0x00, 0xDE, 0xC8}; // lưu cài đặt vào bộ nhớ
 
 /* ---------- Đèn LED RGB WS2812B (1 bóng) ----------
- * Gửi 24 bit màu theo thứ tự G-R-B. Đoạn mã máy dưới đây chỉ đúng cho Arduino Uno (16 MHz):
- * mỗi bit dài 20 chu kỳ = 1,25 µs. Ngắt bị tắt khoảng 30 µs mỗi lần đổi màu (không ảnh hưởng đọc thẻ). */
+ * Dùng thư viện Adafruit NeoPixel. Ngắt bị tắt khoảng 30 µs mỗi lần đổi màu (không ảnh hưởng đọc thẻ). */
+#if defined(__AVR__)
+Adafruit_NeoPixel denRGB(1, CHAN_LED_RGB, NEO_GRB + NEO_KHZ800);
+#endif
 void guiMauWS2812(uint8_t r, uint8_t g, uint8_t b) {
 #if defined(__AVR__)
-  uint8_t mau[3] = { g, r, b };
-  volatile uint8_t* cong = portOutputRegister(digitalPinToPort(CHAN_LED_RGB));
-  uint8_t matNa = digitalPinToBitMask(CHAN_LED_RGB);
-  uint8_t cao = *cong | matNa, thap = *cong & ~matNa, keTiep, bit = 8, byteHT;
-  const uint8_t* p = mau;
-  uint16_t con = 3;
-  byteHT = *p++;
-  uint8_t sreg = SREG;
-  cli();
-  asm volatile(
-    "mov  %[next], %[lo]"      "\n\t"
-    "head20:"                  "\n\t"
-    "st   %a[port],  %[hi]"    "\n\t"
-    "sbrc %[byte],  7"         "\n\t"
-    "mov  %[next], %[hi]"      "\n\t"
-    "dec  %[bit]"              "\n\t"
-    "st   %a[port],  %[next]"  "\n\t"
-    "mov  %[next] ,  %[lo]"    "\n\t"
-    "breq nextbyte20"          "\n\t"
-    "rol  %[byte]"             "\n\t"
-    "rjmp .+0"                 "\n\t"
-    "nop"                      "\n\t"
-    "st   %a[port],  %[lo]"    "\n\t"
-    "nop"                      "\n\t"
-    "rjmp .+0"                 "\n\t"
-    "rjmp head20"              "\n\t"
-    "nextbyte20:"              "\n\t"
-    "ldi  %[bit]  ,  8"        "\n\t"
-    "ld   %[byte] ,  %a[ptr]+" "\n\t"
-    "st   %a[port], %[lo]"     "\n\t"
-    "nop"                      "\n\t"
-    "sbiw %[count], 1"         "\n\t"
-    "brne head20"              "\n"
-    : [port] "+e" (cong), [byte] "+r" (byteHT), [bit] "+d" (bit), [next] "=&r" (keTiep), [count] "+w" (con)
-    : [ptr] "e" (p), [hi] "r" (cao), [lo] "r" (thap));
-  SREG = sreg;
+  denRGB.setPixelColor(0, denRGB.Color(r, g, b));
+  denRGB.show();
 #else
   denGiaLap(r, g, b);                    // chạy thử chương trình trên máy tính (không phải Arduino)
 #endif
-  delayMicroseconds(60);                 // giữ mức thấp > 50 µs để bóng nhận màu
 }
 
 MauDen denHienTai = DEN_LOI;
@@ -624,8 +594,10 @@ bool nhanByteGM65(uint8_t c) {
 void setup() {
   Serial.begin(9600);                      // Serial Monitor + gửi sang ESP32 (chân D1)
   pinMode(CHAN_MANG, INPUT_PULLUP);        // không có ESP32 -> mức CAO -> "chưa nối mạng"
-  pinMode(CHAN_LED_RGB, OUTPUT); digitalWrite(CHAN_LED_RGB, LOW);
-  delay(1); datDen(DEN_DA_QUET);           // vàng trong lúc khởi động
+#if defined(__AVR__)
+  denRGB.begin();
+#endif
+  datDen(DEN_DA_QUET);           // vàng trong lúc khởi động
   mayQuet.begin(9600);
   lcd.init();
   lcd.backlight();
